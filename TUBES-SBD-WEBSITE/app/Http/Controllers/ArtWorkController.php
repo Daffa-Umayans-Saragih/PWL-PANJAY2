@@ -290,7 +290,7 @@ class ArtWorkController extends Controller
                 ->whereHas('images')
                 ->selectRaw("art_works.*, ($scoreSql) as similarity_score", $bindings);
 
-            $relatedArtworks = ArtWork::query()
+            $relatedArtworks = ArtWork::withTrashed()
                 ->fromSub($subQuery, 'scored_artworks')
                 ->where('similarity_score', '>', 0)
                 ->orderByDesc('similarity_score')
