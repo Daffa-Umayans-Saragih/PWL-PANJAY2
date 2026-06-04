@@ -21,8 +21,9 @@ class AdminMiddleware
             return redirect('/account/login')->with('error', 'Please login to access this page.');
         }
 
-        // Cek apakah user memiliki role Admin
-        if (! Auth::user()->is_admin) {
+        // Cek apakah user memiliki salah satu dari role admin
+        $adminRoles = ['cashier', 'admin', 'superadmin'];
+        if (! Auth::user()->hasRole($adminRoles)) {
             return redirect('/')->with('error', 'Unauthorized access. You do not have permission to access the admin panel.');
         }
 

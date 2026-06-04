@@ -58,6 +58,7 @@
                 'color' => 'warning'
             ])
 
+            @if(auth()->user()->hasRole(['admin', 'superadmin']))
             @include('admin.ticket-analytics.components.stat-card', [
                 'title' => 'Total Users',
                 'value' => $totalUsers ?? 0,
@@ -73,6 +74,7 @@
                 'trend' => 'artworks',
                 'color' => 'primary'
             ])
+            @endif
         </div>
     </section>
 
@@ -110,6 +112,7 @@
                 <div class="dashboard-card__arrow">→</div>
             </a>
 
+            @if(auth()->user()->hasRole(['admin', 'superadmin']))
             <!-- Analytics Card -->
             <a href="{{ route('admin.ticket-analytics.index') }}" class="dashboard-card">
                 <div class="dashboard-card__icon">📈</div>
@@ -138,6 +141,7 @@
                 </div>
                 <div class="dashboard-card__arrow">→</div>
             </a>
+            @endif
 
 
         </div>

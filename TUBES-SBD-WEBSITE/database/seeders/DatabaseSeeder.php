@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
         //     ]);
         // });
         $this->call([
-            DefaultAdminSeeder::class,
+            AdminAccountSeeder::class,
             TicketSystemSeeder::class,
             DepartmentSeeder::class,
             GeographySeeder::class,

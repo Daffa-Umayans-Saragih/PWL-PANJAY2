@@ -126,14 +126,20 @@
                             <td class="actions" style="display: flex; gap: 0.5rem; align-items: center;">
                                 @if($user['status'] === 'deleted')
                                     @if($user['uses_soft_deletes'])
+                                        @if(auth()->user()->isSuperAdmin())
                                         <form action="{{ route('admin.users.restore', $user['id']) }}?source={{ $user['source'] }}" method="POST" style="display: inline-block; margin: 0;">
                                             @csrf
                                             <button type="submit" class="action-btn" style="border-color: #4cAF50; color: #4cAF50;">Restore</button>
                                         </form>
+                                        @endif
                                     @endif
                                 @else
-                                    <a href="{{ route('admin.users.edit', $user['id']) }}?source={{ $user['source'] }}" class="action-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Edit</a>
+                                    <a href="{{ route('admin.users.edit', $user['id']) }}?source={{ $user['source'] }}" class="action-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                        {{ auth()->user()->isSuperAdmin() ? 'Edit' : 'View' }}
+                                    </a>
+                                    @if(auth()->user()->isSuperAdmin())
                                     <button type="button" class="action-btn action-danger" onclick="openDeleteModal('{{ $user['id'] }}', '{{ $user['source'] }}')">Delete</button>
+                                    @endif
                                 @endif
                             </td>
                         </tr>

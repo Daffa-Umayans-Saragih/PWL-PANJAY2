@@ -28,6 +28,7 @@
 				<span class="admin-sidebar__text">Payments</span>
 			</a>
 		</div>
+		@if(auth()->user()->hasRole(['admin', 'superadmin']))
 		<div class="admin-sidebar__group" aria-label="Collection">
 			<span class="admin-sidebar__group-label">Collection</span>
 			<a class="admin-sidebar__link" href="#" tabindex="0">
@@ -49,10 +50,13 @@
 				<span class="icon-placeholder icon-placeholder--sm" aria-hidden="true"></span>
 				<span class="admin-sidebar__text">Analytics</span>
 			</a>
+			@if(auth()->user()->isSuperAdmin())
 			<a class="admin-sidebar__link" href="#" tabindex="0">
 				<span class="icon-placeholder icon-placeholder--sm" aria-hidden="true"></span>
 				<span class="admin-sidebar__text">Settings</span>
 			</a>
+			@endif
 		</div>
+		@endif
 	</nav>
 </aside>

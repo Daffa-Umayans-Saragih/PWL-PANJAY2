@@ -245,6 +245,7 @@
                                         <span>🔄</span> Restore
                                     </button>
                                 </form>
+                                @if(auth()->user()->isSuperAdmin())
                                 <form action="{{ route('admin.artworks.force-delete', $artwork->art_work_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('WARNING: This will permanently delete the artwork \'{{ addslashes($artwork->title) }}\' along with all its related records (images, measurements, geographies, etc.)! This action CANNOT BE UNDONE. Proceed?')">
                                     @csrf
                                     @method('DELETE')
@@ -252,6 +253,7 @@
                                         <span>🚨</span> Perm Delete
                                     </button>
                                 </form>
+                                @endif
                             @else
                                 <a href="{{ route('admin.artworks.show', $artwork->art_work_id) }}" class="btn-small-action btn-view" style="text-decoration: none; font-size: 0.75rem; padding: 0.35rem 0.65rem; border-radius: 4px; background: #e3f2fd; color: #0d47a1; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.2s;" title="View Detail">
                                     <span>👁️</span> View

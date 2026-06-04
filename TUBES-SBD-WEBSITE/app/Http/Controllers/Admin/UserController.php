@@ -27,7 +27,7 @@ class UserController extends Controller
                 'id'                => $u->user_id,
                 'name'              => $u->name ?: 'N/A',
                 'email'             => $u->email ?: 'N/A',
-                'role'              => $u->is_admin ? 'admin' : 'user',
+                'role'              => $u->role_admin ?? ($u->is_admin ? 'admin' : 'user'),
                 'source'            => 'Users',
                 'status'            => ($userUsesSoftDeletes && $u->deleted_at) ? 'deleted' : 'active',
                 'uses_soft_deletes' => $userUsesSoftDeletes,
@@ -102,7 +102,7 @@ class UserController extends Controller
 
         // Quick Stats
         $totalUsers = \App\Models\User::count() + \App\Models\Guest::count();
-        $adminCount = \App\Models\User::where('is_admin', true)->count();
+        $adminCount = \App\Models\User::whereNotNull('role_admin')->orWhere('is_admin', true)->count();
         $activeToday = \App\Models\User::whereDate('created_at', \Carbon\Carbon::today())->count() +
                        \App\Models\Guest::whereDate('created_at', \Carbon\Carbon::today())->count();
 
@@ -146,7 +146,7 @@ class UserController extends Controller
             $entity = $userQuery->findOrFail($id);
             $name = $entity->name;
             $email = $entity->email;
-            $role = $entity->is_admin ? 'admin' : 'user';
+            $role = $entity->role_admin ?? ($entity->is_admin ? 'admin' : 'user');
             $is_admin = $entity->is_admin;
         }
 
@@ -172,6 +172,8 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
+        abort_unless(auth()->user()->isSuperAdmin(), 403, 'Unauthorized action. Superadmin role required.');
+
         $source = $request->input('source', 'Users');
 
         $userUsesSoftDeletes = in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(\App\Models\User::class));
@@ -199,7 +201,7 @@ class UserController extends Controller
                 'first_name' => 'required|string|max:255',
                 'last_name'  => 'nullable|string|max:255',
                 'email'      => 'required|email|unique:users,email,' . $id . ',user_id',
-                'is_admin'   => 'required|boolean',
+                'role_admin' => 'nullable|in:cashier,admin,superadmin,user',
             ]);
 
             $userQuery = \App\Models\User::query();
@@ -207,9 +209,15 @@ class UserController extends Controller
                 $userQuery->withTrashed();
             }
             $user = $userQuery->findOrFail($id);
+            $roleAdmin = $request->role_admin;
+            if ($roleAdmin === 'user') {
+                $roleAdmin = null;
+            }
+
             $user->update([
-                'email'    => $request->email,
-                'is_admin' => $request->is_admin,
+                'email'      => $request->email,
+                'role_admin' => $roleAdmin,
+                'is_admin'   => $roleAdmin ? true : false,
             ]);
 
             $user->profile()->updateOrCreate(
@@ -226,6 +234,8 @@ class UserController extends Controller
 
     public function destroy($id)
     {
+        abort_unless(auth()->user()->isSuperAdmin(), 403, 'Unauthorized action. Superadmin role required.');
+
         $source = request()->query('source', 'Users');
 
         $userUsesSoftDeletes = in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(\App\Models\User::class));
@@ -270,6 +280,8 @@ class UserController extends Controller
 
     public function restore($id)
     {
+        abort_unless(auth()->user()->isSuperAdmin(), 403, 'Unauthorized action. Superadmin role required.');
+
         $source = request()->query('source', 'Users');
 
         $userUsesSoftDeletes = in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(\App\Models\User::class));

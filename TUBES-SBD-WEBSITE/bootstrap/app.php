@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user.or.guest' => \App\Http\Middleware\EnsureUserOrGuest::class,
             'guest.auth' => \App\Http\Middleware\GuestAuth::class,
             'no.cache' => \App\Http\Middleware\NoCache::class,
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

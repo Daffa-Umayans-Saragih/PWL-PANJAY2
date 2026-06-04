@@ -36,6 +36,7 @@
             </li>
 
             <!-- Analytics Section -->
+            @if(auth()->user()->hasRole(['admin', 'superadmin']))
             <li class="admin-nav-section">
                 <div class="admin-nav-section-title">Analytics</div>
             </li>
@@ -74,6 +75,7 @@
                     👥 Users
                 </a>
             </li>
+            @endif
 
             <!-- System Section -->
             <li class="admin-nav-section">

@@ -19,6 +19,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'role_admin',
         'premium_started_at',
         'premium_ended_at',
     ];
@@ -71,5 +72,25 @@ class User extends Authenticatable
     public function getRememberTokenName()
     {
         return null;
+    }
+
+    public function hasRole(array $roles): bool
+    {
+        return in_array($this->role_admin, $roles, true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role_admin === 'superadmin';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role_admin === 'admin';
+    }
+
+    public function isCashier(): bool
+    {
+        return $this->role_admin === 'cashier';
     }
 }

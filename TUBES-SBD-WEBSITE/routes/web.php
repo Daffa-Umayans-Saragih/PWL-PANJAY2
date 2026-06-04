@@ -198,99 +198,112 @@ Route::get('/order/show/{order}', [OrderController::class, 'show'])->name('order
 // ADMIN ROUTES (Modern Admin Skeleton)
 // =========================
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/management', [AdminTicketController::class, 'management'])->name('tickets.management');
-    Route::post('/tickets/checkout', [AdminTicketController::class, 'checkout'])->name('tickets.checkout');
-    
-    // Dynamic Ticket Type CRUD
-    Route::post('/tickets/types', [AdminTicketController::class, 'storeType'])->name('tickets.types.store');
-    Route::put('/tickets/types/{id}', [AdminTicketController::class, 'updateType'])->name('tickets.types.update');
-    Route::delete('/tickets/types/{id}', [AdminTicketController::class, 'deleteType'])->name('tickets.types.destroy');
+    // Cashier, Admin, Superadmin Routes
+    Route::middleware(['role:cashier,admin,superadmin'])->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Orders & Tickets (Operational)
+        Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
+        Route::post('/tickets/checkout', [AdminTicketController::class, 'checkout'])->name('tickets.checkout');
+        Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::post('/orders/search-ticket', [AdminOrderController::class, 'searchTicket'])->name('orders.search-ticket');
+        Route::post('/orders/validate-ticket', [AdminOrderController::class, 'validateTicket'])->name('orders.validate-ticket');
+        Route::post('orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
+        Route::resource('orders', AdminOrderController::class);
 
-    // Dynamic Ticket Stock management
-    Route::post('/tickets/stock', [AdminTicketController::class, 'addStock'])->name('tickets.stock.add');
-    Route::post('/tickets/stock/update', [AdminTicketController::class, 'updateStock'])->name('tickets.stock.update');
-    
-    // Tickets API endpoints for dynamic data
-    Route::get('/api/tickets/available-dates', [AdminTicketController::class, 'getAvailableDates'])->name('api.tickets.available-dates');
-    Route::get('/api/tickets/types-for-date/{visitScheduleId}', [AdminTicketController::class, 'getTicketTypesForDate'])->name('api.tickets.types-for-date');
-    
-    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
-    Route::post('/orders/search-ticket', [AdminOrderController::class, 'searchTicket'])->name('orders.search-ticket');
-    Route::post('/orders/validate-ticket', [AdminOrderController::class, 'validateTicket'])->name('orders.validate-ticket');
-    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{id}/restore', [AdminUserController::class, 'restore'])->name('users.restore');
-    Route::get('/exhibitions', [AdminExhibitionController::class, 'index'])->name('exhibitions.index');
-    Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
-
-    // ==== CRUD RESOURCE ROUTES FOR MASTER DATA ====
-    // Departments
-    Route::resource('departments', DepartmentController::class);
-
-    // Object Types
-    Route::resource('object-types', ObjectTypeController::class);
-
-    // Classifications
-    Route::resource('classifications', ClassificationController::class);
-
-    // Locations
-    Route::resource('locations', LocationController::class);
-
-    // Repositories
-    Route::resource('repositories', RepositoryController::class);
-
-    // Materials
-    Route::resource('materials', MaterialController::class);
-
-    // Mediums
-    Route::resource('mediums', MediumController::class);
-
-    // Tags
-    Route::resource('tags', TagController::class);
-
-    // Cultures
-    Route::resource('cultures', CultureController::class);
-
-    // Periods
-    Route::resource('periods', PeriodController::class);
-
-    // Dynasties
-    Route::resource('dynasties', DynastyController::class);
-
-    // Reigns
-    Route::resource('reigns', ReignController::class);
-
-    // Portfolios
-    Route::resource('portfolios', PortfolioController::class);
-
-    // Constituents (Artists)
-    Route::resource('constituents', ConstituentController::class);
-
-    // Artworks
-    Route::post('artworks/{id}/restore', [AdminArtworkController::class, 'restore'])->name('artworks.restore');
-    Route::delete('artworks/{id}/force-delete', [AdminArtworkController::class, 'forceDelete'])->name('artworks.force-delete');
-    Route::resource('artworks', AdminArtworkController::class);
-
-    // Orders CRUD
-    Route::post('orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
-    Route::resource('orders', AdminOrderController::class);
-
-    // Ticket Analytics Dashboard
-    Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {
-        Route::get('/', [TicketAnalyticsController::class, 'index'])->name('index');
-        Route::get('/data', [TicketAnalyticsController::class, 'getAnalyticsData'])->name('data');
+        // Payments
+        Route::prefix('payment')->name('payment.')->group(function () {
+            Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
+            Route::get('/data', [AdminPaymentController::class, 'getData'])->name('data');
+            Route::post('/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('refund');
+        });
+        Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
     });
 
-    // Payment Management Dashboard
-    Route::prefix('payment')->name('payment.')->group(function () {
-        Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
-        Route::get('/data', [AdminPaymentController::class, 'getData'])->name('data');
-        Route::post('/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('refund');
+    // Admin & Superadmin Routes (Master Data & Analytics)
+    Route::middleware(['role:admin,superadmin'])->group(function () {
+        Route::get('/tickets/management', [AdminTicketController::class, 'management'])->name('tickets.management');
+        
+        // Dynamic Ticket Type CRUD
+        Route::post('/tickets/types', [AdminTicketController::class, 'storeType'])->name('tickets.types.store');
+        Route::put('/tickets/types/{id}', [AdminTicketController::class, 'updateType'])->name('tickets.types.update');
+        Route::delete('/tickets/types/{id}', [AdminTicketController::class, 'deleteType'])->name('tickets.types.destroy');
+
+        // Dynamic Ticket Stock management
+        Route::post('/tickets/stock', [AdminTicketController::class, 'addStock'])->name('tickets.stock.add');
+        Route::post('/tickets/stock/update', [AdminTicketController::class, 'updateStock'])->name('tickets.stock.update');
+        
+        // Tickets API endpoints for dynamic data
+        Route::get('/api/tickets/available-dates', [AdminTicketController::class, 'getAvailableDates'])->name('api.tickets.available-dates');
+        Route::get('/api/tickets/types-for-date/{visitScheduleId}', [AdminTicketController::class, 'getTicketTypesForDate'])->name('api.tickets.types-for-date');
+        
+        Route::get('/exhibitions', [AdminExhibitionController::class, 'index'])->name('exhibitions.index');
+        Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
+
+        // ==== CRUD RESOURCE ROUTES FOR MASTER DATA ====
+        // Departments
+        Route::resource('departments', DepartmentController::class);
+
+        // Object Types
+        Route::resource('object-types', ObjectTypeController::class);
+
+        // Classifications
+        Route::resource('classifications', ClassificationController::class);
+
+        // Locations
+        Route::resource('locations', LocationController::class);
+
+        // Repositories
+        Route::resource('repositories', RepositoryController::class);
+
+        // Materials
+        Route::resource('materials', MaterialController::class);
+
+        // Mediums
+        Route::resource('mediums', MediumController::class);
+
+        // Tags
+        Route::resource('tags', TagController::class);
+
+        // Cultures
+        Route::resource('cultures', CultureController::class);
+
+        // Periods
+        Route::resource('periods', PeriodController::class);
+
+        // Dynasties
+        Route::resource('dynasties', DynastyController::class);
+
+        // Reigns
+        Route::resource('reigns', ReignController::class);
+
+        // Portfolios
+        Route::resource('portfolios', PortfolioController::class);
+
+        // Constituents (Artists)
+        Route::resource('constituents', ConstituentController::class);
+
+        // Artworks
+        Route::post('artworks/{id}/restore', [AdminArtworkController::class, 'restore'])->name('artworks.restore');
+        Route::resource('artworks', AdminArtworkController::class);
+
+        // Ticket Analytics Dashboard
+        Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {
+            Route::get('/', [TicketAnalyticsController::class, 'index'])->name('index');
+            Route::get('/data', [TicketAnalyticsController::class, 'getAnalyticsData'])->name('data');
+        });
+
+        // Users (View Only for Admin)
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+    });
+
+    // Superadmin Only Routes
+    Route::middleware(['role:superadmin'])->group(function () {
+        Route::delete('artworks/{id}/force-delete', [AdminArtworkController::class, 'forceDelete'])->name('artworks.force-delete');
+        Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{id}/restore', [AdminUserController::class, 'restore'])->name('users.restore');
     });
 });
 Route::get('/force-logout', function () {

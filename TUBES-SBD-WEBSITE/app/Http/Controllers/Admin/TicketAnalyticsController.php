@@ -303,7 +303,8 @@ class TicketAnalyticsController extends Controller
                 // Determine exact role according to DB reality
                 $role = 'Guest';
                 if ($order->user_id) {
-                    $role = $order->user?->is_admin ? 'Admin' : 'User';
+                    $userRole = $order->user?->role_admin;
+                    $role = $userRole ? ucfirst($userRole) : ($order->user?->is_admin ? 'Admin' : 'User');
                 }
 
                 return [
@@ -330,7 +331,8 @@ class TicketAnalyticsController extends Controller
             ->map(function ($payment) {
                 $role = 'Guest';
                 if ($payment->order?->user_id) {
-                    $role = $payment->order->user->is_admin ? 'Admin' : 'User';
+                    $userRole = $payment->order->user->role_admin;
+                    $role = $userRole ? ucfirst($userRole) : ($payment->order->user->is_admin ? 'Admin' : 'User');
                 }
 
                 return [
