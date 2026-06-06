@@ -315,6 +315,9 @@ Route::get('/force-logout', function () {
 Route::get('/visit-guides/accessibility', function () {
     return view('ordinary.plan-your-visit.accessibility.accessibility');
 })->name('visit.accessibility');
+Route::get('/visit-guides/our-experience', function () {
+    return view('ordinary.plan-your-visit.our-experience.our-experience');
+})->name('visit.our-experience');
 Route::get('/member/membership', function () {
     return view('ordinary.member.membership.membership');
 })->name('member.membership');

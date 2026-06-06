@@ -149,10 +149,14 @@
                     </a>
                 </div>
 
-                <div class="grid gap-5" data-menu-content="visit">
+                <div class="grid gap-3" data-menu-content="visit">
                     <a href="{{ route('visit.accessibility') }}"
                         class="text-base font-semibold text-white hover:text-white/80 transition">
                         Accessibility
+                    </a>
+                    <a href="{{ route('visit.our-experience') }}"
+                        class="text-base font-semibold text-white hover:text-white/80 transition">
+                        Our Experience
                     </a>
                 </div>
 
@@ -241,6 +245,11 @@
                     <a href="{{ route('visit.accessibility') }}"
                         class="text-white/90 hover:text-white transition">
                         Accessibility
+                    </a>
+
+                    <a href="{{ route('visit.our-experience') }}"
+                        class="text-white/90 hover:text-white transition">
+                        Our Experience
                     </a>
 
                 </div>
