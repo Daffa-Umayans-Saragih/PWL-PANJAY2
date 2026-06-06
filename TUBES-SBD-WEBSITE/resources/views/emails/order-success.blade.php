@@ -71,7 +71,11 @@
                         <tr>
                             <td class="content">
                                 <p class="greeting">Hi {{ $billing ? ($billing['first_name'] . ' ' . $billing['last_name']) : 'there' }},</p>
-                                <p class="intro-text">Thank you for booking your visit to The Metropolitan Museum of Art. Your admission tickets have been successfully generated and are ready for your visit.</p>
+                                @if(isset($order) && strtolower($order->order_type) === 'membership')
+                                    <p class="intro-text">Thank you for purchasing a Membership to The Metropolitan Museum of Art. Your payment has been successfully processed and your invoice is attached below.</p>
+                                @else
+                                    <p class="intro-text">Thank you for booking your visit to The Metropolitan Museum of Art. Your admission tickets have been successfully generated and are ready for your visit.</p>
+                                @endif
                                 
                                 <!-- Order Summary -->
                                 <div class="summary-card">
@@ -108,8 +112,23 @@
                                     </table>
                                 </div>
                                 
-                                 <!-- Ticket Cards -->
-                                 @foreach($order->tickets as $ticket)
+                                 @if(isset($order) && strtolower($order->order_type) === 'membership')
+                                     <!-- Membership Item Card -->
+                                     <div class="ticket-card">
+                                         <div class="ticket-header">Membership</div>
+                                         <table class="ticket-layout" cellpadding="0" cellspacing="0" border="0">
+                                             <tr>
+                                                 <td class="ticket-info">
+                                                     <p style="margin: 0 0 8px 0;"><strong>Membership Tier:</strong><br>{{ $order->membership->tier_name ?? 'MET Premium Membership' }}</p>
+                                                     <p style="margin: 0 0 8px 0;"><strong>Payment Status:</strong><br><span class="status-badge status-valid">PAID</span></p>
+                                                     <p style="margin: 0;"><strong>Important:</strong><br>An activation link has been sent to the designated email address.</p>
+                                                 </td>
+                                             </tr>
+                                         </table>
+                                     </div>
+                                 @else
+                                     <!-- Ticket Cards -->
+                                     @foreach($order->tickets as $ticket)
                                      @php
                                          $statusClass = 'status-valid';
                                          $statusText = strtoupper($ticket->status);
@@ -191,6 +210,7 @@
                                         <li>Large bags and backpacks are not permitted in the galleries.</li>
                                     </ul>
                                 </div>
+                                @endif
                                 
                                 <!-- Call to Action -->
                                 <div class="btn-container">

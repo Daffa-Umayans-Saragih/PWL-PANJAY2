@@ -22,7 +22,11 @@ class OrderSuccessMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Your Ticket Order')
+        $subject = (strtolower($this->order?->order_type) === 'membership') 
+            ? 'Your MET Membership Invoice' 
+            : 'Your Ticket Order';
+
+        return $this->subject($subject)
             ->view('emails.order-success')
             ->with([
                 'order'   => $this->order,

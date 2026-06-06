@@ -372,12 +372,12 @@
                     <h2 class="mem-card__title" id="shipCardTitle">Ship Membership Card(s) to this address</h2>
                     <div class="mem-radio-group" role="radiogroup" aria-labelledby="shipCardTitle">
                         <label class="mem-radio-label">
-                            <input type="radio" name="ship_to" value="recipient" class="mem-radio-input" checked>
+                            <input type="radio" name="ship_to" id="shipToRecipient" value="recipient" class="mem-radio-input" checked>
                             <span class="mem-radio-custom" aria-hidden="true"></span>
                             <span class="mem-radio-text">Ship to Gift Recipient</span>
                         </label>
                         <label class="mem-radio-label">
-                            <input type="radio" name="ship_to" value="donor" class="mem-radio-input">
+                            <input type="radio" name="ship_to" id="shipToDonor" value="donor" class="mem-radio-input">
                             <span class="mem-radio-custom" aria-hidden="true"></span>
                             <span class="mem-radio-text">Ship to Donor</span>
                         </label>
@@ -388,17 +388,20 @@
                 <section class="mem-card" aria-labelledby="emailConfirmTitle">
                     <h2 class="mem-card__title" id="emailConfirmTitle">Gift Membership Email Confirmation</h2>
                     <div class="mem-radio-group" role="radiogroup" aria-labelledby="emailConfirmTitle">
-                        <label class="mem-radio-label">
-                            <input type="radio" name="email_confirmation" value="both" class="mem-radio-input">
+                        <label class="mem-radio-label" id="emailConfirmBothLabel">
+                            <input type="radio" name="email_confirmation" id="emailConfirmBoth" value="both" class="mem-radio-input">
                             <span class="mem-radio-custom" aria-hidden="true"></span>
                             <span class="mem-radio-text">Send to Gift Recipient and Donor</span>
                         </label>
                         <label class="mem-radio-label">
-                            <input type="radio" name="email_confirmation" value="donor" class="mem-radio-input" checked>
+                            <input type="radio" name="email_confirmation" id="emailConfirmDonor" value="donor" class="mem-radio-input" checked>
                             <span class="mem-radio-custom" aria-hidden="true"></span>
                             <span class="mem-radio-text">Send to Donor only</span>
                         </label>
                     </div>
+                    <p id="donorHelperText" style="display: none; margin-top: 0.75rem; font-size: 0.875rem; color: #666; line-height: 1.4;">
+                        Since the membership is delivered to the donor, email confirmation will only be sent to the donor to preserve the surprise.
+                    </p>
                 </section>
 
             </div>{{-- /stateIsGift --}}
@@ -458,6 +461,35 @@
         giftNo.checked = true;
         switchState(false);
     }
+
+    // --- Smart Conditional UX for Shipping & Emails ---
+    var shipToRecipient = document.getElementById('shipToRecipient');
+    var shipToDonor     = document.getElementById('shipToDonor');
+    var emailConfirmBoth = document.getElementById('emailConfirmBoth');
+    var emailConfirmDonor = document.getElementById('emailConfirmDonor');
+    var donorHelperText = document.getElementById('donorHelperText');
+    var emailConfirmBothLabel = document.getElementById('emailConfirmBothLabel');
+
+    function updateEmailConfirmationState() {
+        if (!shipToDonor || !emailConfirmBoth) return;
+        
+        if (shipToDonor.checked) {
+            emailConfirmBoth.disabled = true;
+            emailConfirmBoth.checked = false;
+            emailConfirmDonor.checked = true;
+            if (donorHelperText) donorHelperText.style.display = 'block';
+            if (emailConfirmBothLabel) emailConfirmBothLabel.style.opacity = '0.5';
+        } else {
+            emailConfirmBoth.disabled = false;
+            if (donorHelperText) donorHelperText.style.display = 'none';
+            if (emailConfirmBothLabel) emailConfirmBothLabel.style.opacity = '1';
+        }
+    }
+
+    if (shipToRecipient) shipToRecipient.addEventListener('change', updateEmailConfirmationState);
+    if (shipToDonor) shipToDonor.addEventListener('change', updateEmailConfirmationState);
+
+    updateEmailConfirmationState();
 }());
 </script>
 @endpush

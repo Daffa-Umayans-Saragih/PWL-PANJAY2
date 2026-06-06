@@ -107,10 +107,28 @@ class MembershipController extends Controller
         $isGift      = (bool) ($validated['is_gift']      ?? false);
         $autoRenewal = (bool) ($validated['auto_renewal'] ?? false);
 
+        // ── Smart Conditional UX Enforcement ──────────────────────────────────
+        $shipTo      = $validated['ship_to'] ?? 'recipient';
+        $emailConf   = $validated['email_confirmation'] ?? 'donor';
+
+        if ($isGift && $shipTo === 'donor') {
+            $emailConf = 'donor';
+        }
+
+        $donorEmail = $validated['email'] ?? null;
+
         // Recipient e-mail: gift → gift_email; self → submitter email
         $recipientEmail = $isGift
             ? ($validated['gift_email'] ?? $validated['email'])
             : $validated['email'];
+
+        \Illuminate\Support\Facades\Log::info('Membership Checkout Payload', [
+            'isGift' => $isGift,
+            'shipTo' => $shipTo,
+            'emailConf' => $emailConf,
+            'donorEmail' => $donorEmail,
+            'recipientEmail' => $recipientEmail,
+        ]);
 
         // ── Resolve the user_id that will OWN the membership ─────────────────
         //
@@ -169,6 +187,7 @@ class MembershipController extends Controller
                 'expired_at'   => now()->addMinutes(20),
                 'total_amount' => $tier['price'],
                 'order_status' => 'paid',
+                'order_type'   => 'membership',
             ]);
 
             // 2. Payment (instant — membership is paid at checkout)
@@ -221,13 +240,56 @@ class MembershipController extends Controller
         // 5. Send confirmation email AFTER the transaction commits.
         //    If mail fails, the membership is already saved — log and continue.
         try {
-            Mail::to($recipientEmail)->send(new MembershipActivationMail($membership));
+            $shipTo = $validated['ship_to'] ?? 'recipient';
+
+            if ($isGift) {
+                if ($shipTo === 'recipient') {
+                    // Primary card to recipient
+                    Mail::to($recipientEmail)->send(new MembershipActivationMail($membership));
+
+                    // Check if donor wants a copy (email_confirmation = both)
+                    if ($emailConf === 'both' && $donorEmail && $donorEmail !== $recipientEmail) {
+                        Mail::to($donorEmail)->send(new MembershipActivationMail($membership));
+                    }
+                } else {
+                    // shipTo === 'donor'
+                    if ($donorEmail) {
+                        Mail::to($donorEmail)->send(new MembershipActivationMail($membership));
+                    }
+                }
+            } else {
+                // Not a gift
+                Mail::to($recipientEmail)->send(new MembershipActivationMail($membership));
+            }
         } catch (Throwable $e) {
             Log::error('MembershipActivationMail failed', [
                 'membership_id' => $membership->membership_id,
                 'to'            => $recipientEmail,
                 'error'         => $e->getMessage(),
             ]);
+        }
+
+        // 6. Send Payment Confirmation (OrderSuccessMail) to Donor/Purchaser
+        $invoiceEmail = $donorEmail ?: $recipientEmail;
+        if ($invoiceEmail) {
+            try {
+                // SAFE SCOPE RECOVERY
+                $order = \App\Models\Order::find($membership->order_id);
+                if ($order) {
+                    // Pass order and dummy billing to OrderSuccessMail
+                    $dummyBilling = [
+                        'first_name' => $validated['first_name'] ?? 'Valued',
+                        'last_name'  => $validated['last_name'] ?? 'Member'
+                    ];
+                    Mail::to($invoiceEmail)->send(new \App\Mail\OrderSuccessMail($order, $dummyBilling));
+                }
+            } catch (Throwable $e) {
+                Log::error('OrderSuccessMail failed for membership', [
+                    'order_id' => $membership->order_id,
+                    'to'       => $invoiceEmail,
+                    'error'    => $e->getMessage(),
+                ]);
+            }
         }
 
         return redirect()->route('checkout.payments', $membership->order_id)
