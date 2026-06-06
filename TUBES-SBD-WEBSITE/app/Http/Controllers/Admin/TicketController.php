@@ -194,11 +194,18 @@ class TicketController extends Controller
                         $createdTicketIds->push($ticket->ticket_id);
                     }
 
+                    $originalPrice = (float) ($item['availability']->ticketType->base_price ?? 0);
+                    $unitPrice = $originalPrice; // Admin POS always uses base price
+                    $discountAmount = 0;
+
                     // Record the line item in order_details
                     OrderDetail::create([
-                        'order_id'  => $order->order_id,
-                        'ticket_id' => $createdTicketIds->first(),
-                        'quantity'  => $item['qty'],
+                        'order_id'        => $order->order_id,
+                        'ticket_id'       => $createdTicketIds->first(),
+                        'quantity'        => $item['qty'],
+                        'original_price'  => $originalPrice,
+                        'unit_price'      => $unitPrice,
+                        'discount_amount' => $discountAmount,
                     ]);
                 }
 
@@ -440,11 +447,17 @@ class TicketController extends Controller
                 }
             ],
             'base_price' => 'required|numeric|min:0',
+            'is_membership_discount_active' => 'nullable|boolean',
+            'membership_discount_type' => 'nullable|in:percentage,fixed',
+            'membership_discount_value' => 'nullable|numeric|min:0',
         ]);
 
         TicketType::create([
             'ticket_type_name' => $request->ticket_type_name,
             'base_price' => $request->base_price,
+            'is_membership_discount_active' => $request->boolean('is_membership_discount_active'),
+            'membership_discount_type' => $request->membership_discount_type,
+            'membership_discount_value' => $request->membership_discount_value ?? 0,
         ]);
 
         return redirect()->route('admin.tickets.management')->with('success', 'Ticket type added successfully.');
@@ -469,11 +482,17 @@ class TicketController extends Controller
                 }
             ],
             'base_price' => 'required|numeric|min:0',
+            'is_membership_discount_active' => 'nullable|boolean',
+            'membership_discount_type' => 'nullable|in:percentage,fixed',
+            'membership_discount_value' => 'nullable|numeric|min:0',
         ]);
 
         $ticketType->update([
             'ticket_type_name' => $request->ticket_type_name,
             'base_price' => $request->base_price,
+            'is_membership_discount_active' => $request->boolean('is_membership_discount_active'),
+            'membership_discount_type' => $request->membership_discount_type,
+            'membership_discount_value' => $request->membership_discount_value ?? 0,
         ]);
 
         return redirect()->route('admin.tickets.management')->with('success', 'Ticket type updated successfully.');

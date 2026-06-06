@@ -56,7 +56,14 @@
                             <div class="cart-col-right">
                                 <div class="cart-ticket-label">&nbsp;</div>
                                 @foreach($group['items'] as $item)
-                                    <div class="cart-ticket-price">${{ number_format($item['item_total'], 2) }}</div>
+                                    <div class="cart-ticket-price">
+                                        @if(isset($item['original_price']) && $item['original_price'] > $item['price'])
+                                            <span style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">
+                                                ${{ number_format($item['original_price'] * $item['quantity'], 2) }}
+                                            </span>
+                                        @endif
+                                        ${{ number_format($item['item_total'], 2) }}
+                                    </div>
                                 @endforeach
                             </div>
                         </div>

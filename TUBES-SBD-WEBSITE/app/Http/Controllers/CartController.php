@@ -72,7 +72,8 @@ class CartController extends Controller
                         : Carbon::parse($rawDate)->format('l, F j, Y');
                 }
 
-                $price     = (float) ($ticketType?->base_price ?? 0);
+                $originalPrice = (float) ($ticketType?->base_price ?? 0);
+                $price     = (float) ($ticketType?->getEffectivePrice(Auth::user()) ?? 0);
                 $itemTotal = $price * $item['quantity'];
                 $groupTotal += $itemTotal;
 
@@ -80,6 +81,7 @@ class CartController extends Controller
                     'id'                     => 'session:' . $item['ticket_availability_id'],
                     'ticket_type'            => $ticketType?->name,
                     'quantity'               => $item['quantity'],
+                    'original_price'         => $originalPrice,
                     'price'                  => $price,
                     'item_total'             => $itemTotal,
                     'ticket_availability_id' => $item['ticket_availability_id'],
@@ -343,14 +345,16 @@ class CartController extends Controller
                             : Carbon::parse($rawDate)->format('l, F j, Y');
                     }
 
-                    $price     = (float) ($ticketType?->base_price ?? 0);
-                    $itemTotal = $price * $item->quantity;
-                    $groupTotal += $itemTotal;
+                    $originalPrice = (float) ($ticketType?->base_price ?? 0);
+                    $price         = (float) ($ticketType?->getEffectivePrice(Auth::user()) ?? 0);
+                    $itemTotal     = $price * $item->quantity;
+                    $groupTotal   += $itemTotal;
 
                     $groupItems->push([
                         'id'                     => $item->cart_item_id,
                         'ticket_type'            => $ticketType?->name,
                         'quantity'               => $item->quantity,
+                        'original_price'         => $originalPrice,
                         'price'                  => $price,
                         'item_total'             => $itemTotal,
                         'ticket_availability_id' => $item->ticket_availability_id,

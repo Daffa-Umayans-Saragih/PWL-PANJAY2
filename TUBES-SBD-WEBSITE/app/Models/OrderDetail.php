@@ -11,8 +11,10 @@ class OrderDetail extends Model
         'order_id',
         'ticket_id',
         'quantity',
+        'original_price',
+        'unit_price',
+        'discount_amount',
     ];
-    public $timestamps = false;
 
     public function order(): BelongsTo
     {

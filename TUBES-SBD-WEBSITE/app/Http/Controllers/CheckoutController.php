@@ -95,7 +95,7 @@ class CheckoutController extends Controller
                             throw new \Exception("Insufficient ticket stock. Only {$remaining} ticket(s) remaining for {$ticketName}.");
                         }
 
-                        $orderTotalAmount += ((float) ($availability->ticketType->base_price ?? 0)) * (int) $item->quantity;
+                        $orderTotalAmount += ((float) ($availability->ticketType->getEffectivePrice(Auth::user()) ?? 0)) * (int) $item->quantity;
                         $typeName = strtolower($availability->ticketType->ticket_type_name);
                         if ($typeName === 'disabilities') {
                             $disabilitiesQty += (int) $item->quantity;
@@ -159,6 +159,7 @@ class CheckoutController extends Controller
             'payment',
             'tickets.ticketAvailability.visitSchedule.location',
             'tickets.ticketAvailability.ticketType',
+            'orderDetails.ticket.ticketAvailability.ticketType',
             'user',
             'guest',
         ]);
@@ -345,12 +346,19 @@ class CheckoutController extends Controller
                         $createdTicketIds->push($ticket->ticket_id);
                     }
 
+                    $originalPrice = (float) ($availability->ticketType->base_price ?? 0);
+                    $unitPrice = (float) ($availability->ticketType->getEffectivePrice($order->user) ?? 0);
+                    $discountAmount = max(0, $originalPrice - $unitPrice);
+
                     // Insert order_details row for this cart line item
                     // Stores the first ticket_id of the group as the representative reference.
                     OrderDetail::create([
-                        'order_id'  => $order->order_id,
-                        'ticket_id' => $createdTicketIds->first(),
-                        'quantity'  => $item->quantity,
+                        'order_id'        => $order->order_id,
+                        'ticket_id'       => $createdTicketIds->first(),
+                        'quantity'        => $item->quantity,
+                        'original_price'  => $originalPrice,
+                        'unit_price'      => $unitPrice,
+                        'discount_amount' => $discountAmount,
                     ]);
                 }
 

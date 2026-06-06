@@ -71,6 +71,7 @@
                     <tr>
                         <th>Ticket Type</th>
                         <th>Price</th>
+                        <th>Member Discount</th>
                         <th>Description</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -81,10 +82,18 @@
                     <tr>
                         <td><strong>{{ $type->ticket_type_name }}</strong></td>
                         <td>${{ number_format($type->base_price, 2) }}</td>
+                        <td>
+                            @if($type->is_membership_discount_active)
+                                <span style="color: #137333; font-weight: bold;">Yes</span> 
+                                ({{ $type->membership_discount_type == 'percentage' ? $type->membership_discount_value . '%' : '$' . number_format($type->membership_discount_value, 2) }})
+                            @else
+                                <span style="color: #c5221f;">No</span>
+                            @endif
+                        </td>
                         <td>Museum admission</td>
                         <td><span class="status-badge status-active">Active</span></td>
                         <td class="actions">
-                            <button class="action-btn" onclick="openEditTypeModal({{ $type->ticket_type_id }}, '{{ addslashes($type->ticket_type_name) }}', {{ $type->base_price }})">Edit</button>
+                            <button class="action-btn" onclick="openEditTypeModal({{ $type->ticket_type_id }}, '{{ addslashes($type->ticket_type_name) }}', {{ $type->base_price }}, {{ $type->is_membership_discount_active ? 'true' : 'false' }}, '{{ $type->membership_discount_type }}', {{ $type->membership_discount_value }})">Edit</button>
                             <form action="{{ route('admin.tickets.types.destroy', $type->ticket_type_id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this ticket type?');" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
@@ -232,6 +241,25 @@
                 <label style="display:block; font-weight:600; margin-bottom:0.5rem; color:#444;">Base Price ($)</label>
                 <input type="number" name="base_price" step="0.01" min="0" class="form-input" style="width:100%; box-sizing:border-box;" required placeholder="0.00">
             </div>
+            <div style="margin-bottom:1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <label style="display:flex; align-items:center; font-weight:600; margin-bottom:0.5rem; color:#444;">
+                    <input type="checkbox" name="is_membership_discount_active" value="1" style="margin-right: 0.5rem; transform: scale(1.2);">
+                    Enable Membership Discount
+                </label>
+            </div>
+            <div style="display:flex; gap: 1rem; margin-bottom:1.5rem;">
+                <div style="flex:1;">
+                    <label style="display:block; font-weight:600; margin-bottom:0.5rem; color:#444;">Discount Type</label>
+                    <select name="membership_discount_type" class="form-input" style="width:100%; box-sizing:border-box;">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount ($)</option>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-weight:600; margin-bottom:0.5rem; color:#444;">Discount Value</label>
+                    <input type="number" name="membership_discount_value" step="0.01" min="0" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="0">
+                </div>
+            </div>
             <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
                 <button type="button" class="btn" style="background:#eee; color:#333; padding: 0.5rem 1rem; border-radius: 4px; border: none; cursor: pointer;" onclick="closeAddTypeModal()">Cancel</button>
                 <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem;">Save Ticket Type</button>
@@ -254,6 +282,25 @@
             <div style="margin-bottom:1.5rem;">
                 <label style="display:block; font-weight:600; margin-bottom:0.5rem; color:#444;">Base Price ($)</label>
                 <input type="number" id="edit_base_price" name="base_price" step="0.01" min="0" class="form-input" style="width:100%; box-sizing:border-box;" required>
+            </div>
+            <div style="margin-bottom:1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <label style="display:flex; align-items:center; font-weight:600; margin-bottom:0.5rem; color:#444;">
+                    <input type="checkbox" id="edit_is_membership_discount_active" name="is_membership_discount_active" value="1" style="margin-right: 0.5rem; transform: scale(1.2);">
+                    Enable Membership Discount
+                </label>
+            </div>
+            <div style="display:flex; gap: 1rem; margin-bottom:1.5rem;">
+                <div style="flex:1;">
+                    <label style="display:block; font-weight:600; margin-bottom:0.5rem; color:#444;">Discount Type</label>
+                    <select id="edit_membership_discount_type" name="membership_discount_type" class="form-input" style="width:100%; box-sizing:border-box;">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount ($)</option>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-weight:600; margin-bottom:0.5rem; color:#444;">Discount Value</label>
+                    <input type="number" id="edit_membership_discount_value" name="membership_discount_value" step="0.01" min="0" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="0">
+                </div>
             </div>
             <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
                 <button type="button" class="btn" style="background:#eee; color:#333; padding: 0.5rem 1rem; border-radius: 4px; border: none; cursor: pointer;" onclick="closeEditTypeModal()">Cancel</button>
@@ -293,11 +340,14 @@ function closeAddTypeModal() {
     document.getElementById('addTypeModal').style.display = 'none';
 }
 
-function openEditTypeModal(id, name, price) {
+function openEditTypeModal(id, name, price, hasDiscount, discountType, discountValue) {
     const form = document.getElementById('editTypeForm');
     form.action = `/admin/tickets/types/${id}`;
     document.getElementById('edit_ticket_type_name').value = name;
     document.getElementById('edit_base_price').value = price;
+    document.getElementById('edit_is_membership_discount_active').checked = hasDiscount;
+    document.getElementById('edit_membership_discount_type').value = discountType || 'percentage';
+    document.getElementById('edit_membership_discount_value').value = discountValue || 0;
     document.getElementById('editTypeModal').style.display = 'flex';
 }
 function closeEditTypeModal() {

@@ -190,21 +190,25 @@
                             <span class="item-price">${{ number_format($order->total_amount, 2) }}</span>
                         </div>
                     @else
-                        @php
-                            $groupedTickets = $order->tickets->groupBy('ticket_availability_id');
-                        @endphp
-                        @foreach($groupedTickets as $availabilityId => $tickets)
+                        @foreach($order->orderDetails as $detail)
                             @php
-                                $firstTicket = $tickets->first();
-                                $availability = $firstTicket->ticketAvailability;
-                                $quantity = $tickets->count();
-                                $price = $availability->ticketType->base_price;
+                                $ticket = $detail->ticket;
+                                $ticketName = $ticket ? ($ticket->ticketAvailability->ticketType->ticket_type_name ?? 'Admission') : 'Admission';
+                                $quantity = $detail->quantity;
+                                $price = $detail->unit_price > 0 ? $detail->unit_price : ($ticket ? $ticket->ticketAvailability->ticketType->base_price : 0);
+                                $originalPrice = $detail->original_price > 0 ? $detail->original_price : $price;
                                 $itemTotal = $price * $quantity;
                             @endphp
                             <div class="summary-item">
                                 <div class="item-info">
-                                    <span class="item-name">{{ $availability->ticketType->name }}</span>
-                                    <span class="item-meta">Qty: {{ $quantity }} × ${{ number_format($price, 2) }}</span>
+                                    <span class="item-name">{{ $ticketName }}</span>
+                                    <span class="item-meta">
+                                        Qty: {{ $quantity }} × 
+                                        @if($originalPrice > $price)
+                                            <span style="text-decoration: line-through; color: #888; margin-right: 2px;">${{ number_format($originalPrice, 2) }}</span>
+                                        @endif
+                                        ${{ number_format($price, 2) }}
+                                    </span>
                                 </div>
                                 <span class="item-price">${{ number_format($itemTotal, 2) }}</span>
                             </div>

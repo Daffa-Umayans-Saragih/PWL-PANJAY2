@@ -146,11 +146,16 @@
                         $ticketAvailabilities = $firstSchedule ? $firstSchedule->ticketAvailabilities : [];
                     @endphp
                     @foreach($ticketAvailabilities as $av)
+                        @php
+                            $origPrice = (float) $av->ticketType->base_price;
+                            $effPrice = (float) $av->ticketType->getEffectivePrice(Auth::user());
+                            $hasDiscount = $origPrice > $effPrice;
+                        @endphp
                         <div class="ticket-row step-hidden"
                              data-id="{{ $av->ticket_availability_id }}"
                              data-ticket-type-id="{{ $av->ticketType->ticket_type_id }}"
                              data-type="{{ strtolower($av->ticketType->name) }}"
-                             data-price="{{ $av->ticketType->base_price }}">
+                             data-price="{{ $effPrice }}">
                             <div class="ticket-info">
                                 <h3>{{ $av->ticketType->ticket_type_name }} Admission</h3>
 
@@ -162,7 +167,19 @@
                                     <p>65 and over</p>
                                 @endif
                             </div>
-                            <div class="ticket-price">${{ number_format((float)$av->ticketType->base_price, 2) }}</div>
+                            <div class="ticket-price">
+                                @if($hasDiscount)
+                                    <span style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">
+                                        ${{ number_format($origPrice, 2) }}
+                                    </span>
+                                    <span>
+                                        ${{ number_format($effPrice, 2) }}
+                                        <span style="font-size: 0.75em; color: #c3002f; font-weight: bold; display: block; margin-top: 2px;">Member Price</span>
+                                    </span>
+                                @else
+                                    ${{ number_format($origPrice, 2) }}
+                                @endif
+                            </div>
                             <div class="ticket-control">
                                 <button type="button" class="btn-minus">—</button>
                                 <span class="qty">0</span>
