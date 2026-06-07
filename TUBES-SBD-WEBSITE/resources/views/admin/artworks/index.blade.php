@@ -35,30 +35,42 @@
     @endif
 
     <!-- Quick Stats -->
-    <div class="quick-stats-grid">
-        @include('admin.ticket-analytics.components.stat-card', [
-            'title' => 'Total Artworks',
-            'value' => $totalArtworks ?? 0,
-            'icon' => '🎨',
-            'trend' => 'in collection',
-            'color' => 'primary'
-        ])
+    <div class="artworks-kpi-grid">
+        <!-- Total Artworks -->
+        <div class="artworks-kpi-card">
+            <div class="kpi-icon-box kpi-icon-violet">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">TOTAL ARTWORKS</div>
+                <div class="kpi-value">{{ $totalArtworks ?? 0 }}</div>
+                <div class="kpi-caption">in collection</div>
+            </div>
+        </div>
         
-        @include('admin.ticket-analytics.components.stat-card', [
-            'title' => 'Departments',
-            'value' => $totalDepartments ?? 0,
-            'icon' => '🏛️',
-            'trend' => 'categories',
-            'color' => 'info'
-        ])
-        
-        @include('admin.ticket-analytics.components.stat-card', [
-            'title' => 'On Display',
-            'value' => $onDisplay ?? 0,
-            'icon' => '✓',
-            'trend' => 'visible',
-            'color' => 'success'
-        ])
+        <!-- Departments -->
+        <div class="artworks-kpi-card">
+            <div class="kpi-icon-box kpi-icon-bronze">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">DEPARTMENTS</div>
+                <div class="kpi-value">{{ $totalDepartments ?? 0 }}</div>
+                <div class="kpi-caption">categories</div>
+            </div>
+        </div>
+
+        <!-- On Display -->
+        <div class="artworks-kpi-card">
+            <div class="kpi-icon-box kpi-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">ON DISPLAY</div>
+                <div class="kpi-value">{{ $onDisplay ?? 0 }}</div>
+                <div class="kpi-caption">visible</div>
+            </div>
+        </div>
     </div>
 
     <!-- Artworks Grid -->
@@ -300,8 +312,77 @@
 .page-subtitle { font-size: 0.95rem; color: #666; margin: 0; }
 .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; }
 
-/* Quick Stats Grid */
-.quick-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+/* Artworks KPI Stats */
+.artworks-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.artworks-kpi-card {
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.artworks-kpi-card:hover {
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.06), 0 4px 12px -3px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+    border-color: rgba(203, 213, 225, 0.9);
+}
+
+.kpi-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kpi-icon-violet { background: #eef2ff; color: #6366f1; border: 2px solid #e0e7ff; }
+.kpi-icon-bronze { background: #fef3c7; color: #d97706; border: 2px solid #fde68a; }
+.kpi-icon-green { background: #ecfdf5; color: #10b981; border: 2px solid #d1fae5; }
+
+.kpi-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.kpi-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.kpi-caption {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #94a3b8;
+}
 
 /* Artwork Grid */
 .table-section { background: white; border-radius: 8px; padding: 1.5rem; }

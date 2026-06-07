@@ -13,39 +13,67 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="quick-stats-grid">
-        @include('admin.ticket-analytics.components.stat-card', [
-            'title' => 'Total Orders',
-            'value' => $totalOrders ?? 0,
-            'icon' => '📦',
-            'trend' => 'today',
-            'color' => 'primary'
-        ])
+    <div class="orders-kpi-grid">
+        <!-- Total Orders -->
+        <div class="orders-kpi-card">
+            <div class="kpi-icon-box kpi-icon-blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">TOTAL ORDERS</div>
+                <div class="kpi-value">{{ $totalOrders ?? 0 }}</div>
+                <div class="kpi-caption">today</div>
+            </div>
+        </div>
         
-        @include('admin.ticket-analytics.components.stat-card', [
-            'title' => 'Pending Orders',
-            'value' => $pendingOrders ?? 0,
-            'icon' => '⏳',
-            'trend' => 'awaiting scan',
-            'color' => 'warning'
-        ])
-        
-        @include('admin.ticket-analytics.components.stat-card', [
-            'title' => 'Completed Orders',
-            'value' => $completedOrders ?? 0,
-            'icon' => '✅',
-            'trend' => 'scanned',
-            'color' => 'success'
-        ])
+        <!-- Pending Orders -->
+        <div class="orders-kpi-card">
+            <div class="kpi-icon-box kpi-icon-amber">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">PENDING ORDERS</div>
+                <div class="kpi-value">{{ $pendingOrders ?? 0 }}</div>
+                <div class="kpi-caption">awaiting scan</div>
+            </div>
+        </div>
+
+        <!-- Completed Orders -->
+        <div class="orders-kpi-card">
+            <div class="kpi-icon-box kpi-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">COMPLETED ORDERS</div>
+                <div class="kpi-value">{{ $completedOrders ?? 0 }}</div>
+                <div class="kpi-caption">scanned</div>
+            </div>
+        </div>
     </div>
 
     <!-- QR Scan Interface -->
     <section class="scan-section">
-        <h2 class="section-title">Scan QR Ticket or Enter Ticket ID</h2>
-        <div class="scan-interface">
-            <div class="scan-input-area">
-                <div class="scan-icon">📱</div>
-                <p class="scan-label">Scan ticket QR code or enter ticket ID manually</p>
+        <div class="scan-card">
+            <div class="scan-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-qr-code">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                    <path d="M3 14h3v3H3z" />
+                    <path d="M6 17h1v4H3v-3" />
+                    <path d="M10 21h1" />
+                    <path d="M10 14h1v3" />
+                    <path d="M10 3h1" />
+                    <path d="M10 10h1" />
+                    <path d="M3 10h1" />
+                </svg>
+            </div>
+            
+            <h2 class="scan-title">QR Ticket Scanner</h2>
+            <p class="scan-subtitle">Scan ticket QR code or enter ticket ID manually</p>
+
+            <div class="scan-input-container">
+                <svg class="scan-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input 
                     type="text" 
                     id="scanInput" 
@@ -53,8 +81,27 @@
                     placeholder="Scan QR code or enter ticket ID..."
                     autofocus
                 >
-                <p class="scan-hint">💡 Press Enter after scanning or typing</p>
-                <div id="searchStatus" class="search-status" style="display: none;"></div>
+                <div class="scan-keyboard-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.001"/><path d="M10 8h.001"/><path d="M14 8h.001"/><path d="M18 8h.001"/><path d="M8 12h.001"/><path d="M12 12h.001"/><path d="M16 12h.001"/><path d="M7 16h10"/></svg>
+                </div>
+            </div>
+
+            <div id="searchStatus" class="search-status" style="display: none;"></div>
+
+            <div class="scan-divider">
+                <span>OR</span>
+            </div>
+
+            <button type="button" class="btn-camera" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                Use Camera to Scan
+            </button>
+
+            <div class="scan-status-badge">
+                <div class="scan-status-dot"></div>
+                <span class="scan-status-text">Scanner Ready</span>
+                <span class="scan-status-divider">|</span>
+                <span class="scan-status-desc">Point camera at QR code to scan automatically</span>
             </div>
         </div>
     </section>
@@ -259,91 +306,274 @@
     color: #333;
 }
 
-.quick-stats-grid {
+.orders-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
 }
 
-/* Scan Section */
+.orders-kpi-card {
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.orders-kpi-card:hover {
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.06), 0 4px 12px -3px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+    border-color: rgba(203, 213, 225, 0.9);
+}
+
+.kpi-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kpi-icon-blue { background: #eff6ff; color: #3b82f6; border: 2px solid #dbeafe; }
+.kpi-icon-amber { background: #fffbeb; color: #f59e0b; border: 2px solid #fef3c7; }
+.kpi-icon-green { background: #ecfdf5; color: #10b981; border: 2px solid #d1fae5; }
+
+.kpi-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.kpi-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.kpi-caption {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+/* QR Scan Interface Modern Redesign */
 .scan-section {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: center;
 }
 
-.scan-interface {
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 3rem 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.scan-input-area {
+.scan-card {
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 22px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
 }
 
-.scan-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+.scan-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: #eff6ff;
+    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    border: 4px solid #f8fafc;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
 }
 
-.scan-label {
-    font-size: 1rem;
+.scan-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.scan-subtitle {
+    font-size: 0.9375rem;
+    color: #64748b;
+    margin: 0 0 2rem 0;
+}
+
+.scan-input-container {
+    width: 100%;
+    max-width: 500px;
+    position: relative;
     margin-bottom: 1.5rem;
-    color: #666;
-    font-weight: 500;
+}
+
+.scan-input-icon {
+    position: absolute;
+    left: 1.125rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.scan-keyboard-icon {
+    position: absolute;
+    right: 1.125rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #cbd5e1;
 }
 
 .scan-input {
     width: 100%;
-    max-width: 500px;
-    padding: 1rem;
-    font-size: 1.1rem;
-    border: 2px solid #2196F3;
-    border-radius: 8px;
-    text-align: center;
+    padding: 1.125rem 3rem;
+    font-size: 1.0625rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    color: #1e293b;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
     outline: none;
-    transition: all 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.scan-input::placeholder {
+    color: #94a3b8;
 }
 
 .scan-input:focus {
-    border-color: #1976D2;
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.scan-input:disabled {
-    background-color: #f5f5f5;
-    cursor: not-allowed;
-}
-
-.scan-hint {
-    font-size: 0.85rem;
-    color: #999;
-    margin-top: 0.5rem;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .search-status {
-    margin-top: 1rem;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 1.5rem auto;
     padding: 0.75rem 1rem;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    text-align: center;
 }
 
-.search-status.loading {
-    background-color: #e3f2fd;
-    color: #1976D2;
+.search-status.loading { background-color: #f0f9ff; color: #0284c7; }
+.search-status.error { background-color: #fef2f2; color: #dc2626; }
+.search-status.success { background-color: #f0fdf4; color: #16a34a; }
+
+.scan-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 300px;
+    margin: 0.5rem 0 1.5rem 0;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.search-status.error {
-    background-color: #ffebee;
-    color: #c62828;
+.scan-divider::before,
+.scan-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-.search-status.success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+.scan-divider::before { margin-right: 1rem; }
+.scan-divider::after { margin-left: 1rem; }
+
+.btn-camera {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 2.5rem;
+}
+
+.btn-camera:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.btn-camera:disabled {
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+    background: #f8fafc;
+}
+
+.scan-status-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.scan-status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.scan-status-text {
+    font-weight: 600;
+    color: #10b981;
+    font-size: 0.875rem;
+}
+
+.scan-status-divider {
+    color: #cbd5e1;
+}
+
+.scan-status-desc {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
 /* Order Details Section */
