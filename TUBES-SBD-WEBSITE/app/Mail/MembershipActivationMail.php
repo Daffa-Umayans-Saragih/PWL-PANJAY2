@@ -12,6 +12,11 @@ class MembershipActivationMail extends Mailable
 
     public function build()
     {
+        \Illuminate\Support\Facades\Log::info('MembershipActivationMail Dispatched', [
+            'to' => request()->url(),
+            'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10)
+        ]);
+
         return $this->subject('Your MET Membership Confirmation')
             ->view('emails.membership-activation')
             ->with([

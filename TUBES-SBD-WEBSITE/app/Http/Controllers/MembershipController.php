@@ -115,12 +115,13 @@ class MembershipController extends Controller
             $emailConf = 'donor';
         }
 
-        $donorEmail = $validated['email'] ?? null;
+        $donorEmail = isset($validated['email']) ? strtolower(trim($validated['email'])) : null;
 
         // Recipient e-mail: gift → gift_email; self → submitter email
-        $recipientEmail = $isGift
+        $rawRecipientEmail = $isGift
             ? ($validated['gift_email'] ?? $validated['email'])
             : $validated['email'];
+        $recipientEmail = strtolower(trim($rawRecipientEmail));
 
         \Illuminate\Support\Facades\Log::info('Membership Checkout Payload', [
             'isGift' => $isGift,
@@ -242,24 +243,33 @@ class MembershipController extends Controller
         try {
             $shipTo = $validated['ship_to'] ?? 'recipient';
 
+            $activationRecipients = [];
+
             if ($isGift) {
                 if ($shipTo === 'recipient') {
                     // Primary card to recipient
-                    Mail::to($recipientEmail)->send(new MembershipActivationMail($membership));
+                    $activationRecipients[] = $recipientEmail;
 
                     // Check if donor wants a copy (email_confirmation = both)
-                    if ($emailConf === 'both' && $donorEmail && $donorEmail !== $recipientEmail) {
-                        Mail::to($donorEmail)->send(new MembershipActivationMail($membership));
+                    if ($emailConf === 'both' && $donorEmail) {
+                        $activationRecipients[] = $donorEmail;
                     }
                 } else {
                     // shipTo === 'donor'
                     if ($donorEmail) {
-                        Mail::to($donorEmail)->send(new MembershipActivationMail($membership));
+                        $activationRecipients[] = $donorEmail;
                     }
                 }
             } else {
                 // Not a gift
-                Mail::to($recipientEmail)->send(new MembershipActivationMail($membership));
+                $activationRecipients[] = $recipientEmail;
+            }
+
+            // Remove empty values and strictly deduplicate emails
+            $activationRecipients = array_unique(array_filter($activationRecipients));
+
+            foreach ($activationRecipients as $email) {
+                Mail::to($email)->send(new MembershipActivationMail($membership));
             }
         } catch (Throwable $e) {
             Log::error('MembershipActivationMail failed', [
