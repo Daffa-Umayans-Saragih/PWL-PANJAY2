@@ -396,7 +396,7 @@
                     <div class="met-tab-panel" id="tab-provenance" style="display:none">
                         <div class="met-provenance-wrap">
                             <p class="met-provenance-note">
-                                The following is the ownership history of this work from the time of its creation or earliest recorded existence to its acquisition by the Metropolitan Museum of Art.
+                                The following is the ownership history of this work from the time of its creation or earliest recorded existence to its acquisition by Our Civilization Museum of Art.
                             </p>
                             <div class="met-provenance-body" id="met-prov-body">
                                 <pre class="met-provenance-pre">{{ $provenance }}</pre>
