@@ -15,9 +15,7 @@
     /* ── Resolve image URL ── */
     $resolveUrl = function($img) {
         if (!$img) return null;
-        $url = $img->image_url ?? $img->url ?? '';
-        if (str_starts_with($url, 'http')) return $url;
-        return asset('storage/' . ltrim($url, '/'));
+        return $img->resolved_url;
     };
 
     /* ── Constituents ─────────────────────────────────── */

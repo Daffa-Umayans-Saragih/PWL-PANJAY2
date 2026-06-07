@@ -165,7 +165,7 @@
                     <div class="artwork-image-container">
                         @php
                             $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
-                            $imageUrl = $primaryImage?->image_url;
+                            $imageUrl = $primaryImage?->resolved_url;
                         @endphp
                         
                         @if($imageUrl)

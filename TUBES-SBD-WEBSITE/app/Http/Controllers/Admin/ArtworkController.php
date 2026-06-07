@@ -33,6 +33,7 @@ use App\Models\Locale;
 use App\Models\Locus;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ArtworkController extends Controller
 {
@@ -246,6 +247,7 @@ class ArtworkController extends Controller
             'geographies.*.locus_id' => 'nullable|exists:loci,locus_id',
             'geographies.*.excavation_id' => 'nullable|exists:excavations,excavation_id',
             'geographies.*.river_id' => 'nullable|exists:rivers,river_id',
+            'new_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         try {
@@ -257,9 +259,6 @@ class ArtworkController extends Controller
 
             // Save constituents with pivot data
             $this->saveConstituents($artwork, $request);
-
-            // Handle image uploads
-            $this->saveImages($artwork, $request);
 
             // Save child records (measurements, references, SIMs)
             $this->saveChildRecords($artwork, $request);
@@ -433,6 +432,7 @@ class ArtworkController extends Controller
             'geographies.*.locus_id' => 'nullable|exists:loci,locus_id',
             'geographies.*.excavation_id' => 'nullable|exists:excavations,excavation_id',
             'geographies.*.river_id' => 'nullable|exists:rivers,river_id',
+            'new_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         try {
@@ -446,9 +446,6 @@ class ArtworkController extends Controller
 
             // Save constituents with pivot data
             $this->saveConstituents($artwork, $request);
-
-            // Handle image uploads and updates
-            $this->saveImages($artwork, $request);
 
             // Save child records (measurements, references, SIMs)
             $this->saveChildRecords($artwork, $request);
@@ -538,41 +535,7 @@ class ArtworkController extends Controller
         $artwork->portfolios()->sync($request->input('portfolios') ?? []);
     }
 
-    /**
-     * Save/update artwork images
-     */
-    protected function saveImages(ArtWork $artwork, Request $request)
-    {
-        // Handle primary image selection
-        if ($request->has('primary_image_id') && $request->input('primary_image_id')) {
-            $primaryImageId = $request->input('primary_image_id');
-            
-            // Set all images to non-primary
-            $artwork->images()->update(['is_primary' => false]);
-            
-            // Set selected image as primary
-            $artwork->images()
-                ->where('image_id', $primaryImageId)
-                ->update(['is_primary' => true]);
-        }
 
-        // Add new image if URL provided
-        if ($request->has('new_image_url') && $request->input('new_image_url')) {
-            $imageUrl = $request->input('new_image_url');
-            $isPrimary = $request->has('new_image_primary') ? (bool) $request->input('new_image_primary') : false;
-
-            // If this is primary, set existing images to non-primary
-            if ($isPrimary) {
-                $artwork->images()->update(['is_primary' => false]);
-            }
-
-            // Create new image
-            $artwork->images()->create([
-                'image_url' => $imageUrl,
-                'is_primary' => $isPrimary
-            ]);
-        }
-    }
 
     /**
      * Save/update constituents with pivot data (roles, prefixes, suffixes)
@@ -985,16 +948,23 @@ class ArtworkController extends Controller
             $primaryIndex = $request->input('primary_image_index', null);
 
             foreach ($request->input('images') as $index => $row) {
-                $url = isset($row['url']) ? trim($row['url']) : '';
+                $mode = isset($row['mode']) ? $row['mode'] : 'url';
+                $url = '';
+
+                if ($mode === 'file') {
+                    $file = $request->file("images.$index.file");
+                    // If file is uploaded, process it
+                    if ($file && $file->isValid()) {
+                        $path = $file->store('artworks', 'public');
+                        $url = \Illuminate\Support\Facades\Storage::url($path);
+                    }
+                } elseif ($mode === 'url') {
+                    $url = isset($row['url']) ? trim($row['url']) : '';
+                }
 
                 // Ignore completely empty rows
                 if ($url === '') {
                     continue;
-                }
-
-                // Validate URL format
-                if (!filter_var($url, FILTER_VALIDATE_URL)) {
-                    throw new \Exception("Image URL must be a valid absolute URL format (e.g., https://example.com/image.jpg).");
                 }
 
                 $validRows[] = [

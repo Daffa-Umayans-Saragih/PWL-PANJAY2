@@ -444,7 +444,7 @@
         @forelse($artworks ?? [] as $artwork)
             <a href="{{ $artwork->slug ? route('artwork.show', $artwork->slug) : '#' }}" class="art-card" {!! !$artwork->slug ? 'onclick="return false;" style="cursor: default;"' : '' !!}>
                 <div class="art-image-wrapper">
-                    <img src="{{ $artwork->image_url ?? asset('images/placeholder.jpg') }}" 
+                    <img src="{{ $artwork->resolved_image_url ?? asset('images/placeholder.jpg') }}" 
                          alt="{{ $artwork->title }}"
                          class="art-image">
                 </div>

@@ -182,7 +182,7 @@
                     <div class="image-preview-grid">
                         @foreach($artwork->images as $image)
                             <div class="image-preview-item">
-                                <img src="{{ $image->image_url }}" alt="Artwork image">
+                                <img src="{{ $image->resolved_url }}" alt="Artwork image">
                                 <form action="{{ route('admin.art.image.delete', $image->image_id) }}" method="POST" class="form-inline" onsubmit="return confirm('Delete this image?');">
                                     @csrf
                                     @method('DELETE')

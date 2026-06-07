@@ -102,7 +102,7 @@
             <div class="artwork-card" data-artwork-id="{{ $artwork->art_work_id }}">
                 <div class="artwork-image">
                     @if($artwork->images->first())
-                        <img src="{{ asset('storage/' . $artwork->images->first()->image_url) }}" 
+                        <img src="{{ $artwork->images->first()->resolved_url }}" 
                              alt="{{ $artwork->title }}">
                     @else
                         <div class="no-image">

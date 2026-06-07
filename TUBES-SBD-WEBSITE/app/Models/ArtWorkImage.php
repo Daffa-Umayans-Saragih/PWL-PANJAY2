@@ -37,4 +37,20 @@ class ArtWorkImage extends Model
     {
         return $this->image_url;
     }
+
+    public function getResolvedUrlAttribute(): ?string
+    {
+        $url = $this->image_url;
+        if (!$url) return null;
+        
+        if (str_starts_with($url, 'http')) {
+            return $url;
+        }
+
+        if (str_starts_with($url, '/storage/') || str_starts_with($url, 'storage/')) {
+            return asset(ltrim($url, '/'));
+        }
+
+        return asset('storage/' . ltrim($url, '/'));
+    }
 }

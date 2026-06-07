@@ -14,7 +14,7 @@
     <!-- Form -->
     <div class="form-container">
         <form action="{{ $isEdit ? route('admin.artworks.update', $artwork->art_work_id) : route('admin.artworks.store') }}" 
-              method="POST" class="admin-form" id="artworkForm" novalidate>
+              method="POST" class="admin-form" id="artworkForm" enctype="multipart/form-data" novalidate>
             @csrf
             @if($isEdit)
                 @method('PUT')
@@ -803,55 +803,6 @@
                 </div>
             </div>
 
-            <!-- SECTION 6: ARTWORK IMAGES -->
-            <div class="form-section">
-                <h3 class="section-title">Artwork Images</h3>
-                
-                @if($isEdit && $artwork && $artwork->images->isNotEmpty())
-                    <div style="margin-bottom: 1.5rem;">
-                        <h4 style="margin-bottom: 1rem;">Existing Images</h4>
-                        <div class="existing-images">
-                            @foreach($artwork->images as $image)
-                                <div class="image-item">
-                                    <div class="image-preview">
-                                        <img src="{{ $image->image_url }}" alt="Artwork image" style="max-width: 150px; max-height: 150px; object-fit: contain;">
-                                    </div>
-                                    <div class="image-info">
-                                        <p style="margin: 0 0 0.5rem 0; word-break: break-all; font-size: 0.85rem;">{{ $image->image_url }}</p>
-                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                            <label class="image-primary-checkbox">
-                                                <input type="radio" name="primary_image_id" value="{{ $image->image_id }}" {{ $image->is_primary ? 'checked' : '' }}>
-                                                Set as primary
-                                            </label>
-                                            <button type="button" class="btn-small btn-danger-small" onclick="if(confirm('Delete this image?')) { this.closest('.image-item').remove(); }">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Add New Image -->
-                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
-                    <h4 style="margin-bottom: 1rem;">Add Image</h4>
-                    <div class="form-group">
-                        <label for="new_image_url" class="form-label">Image URL</label>
-                        <input type="text" id="new_image_url" name="new_image_url" class="form-control"
-                            placeholder="Enter image URL (e.g., https://...)">
-                        <small class="form-text text-muted">Add the full URL to the image. Leave empty to skip.</small>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" id="new_image_primary" name="new_image_primary" class="form-check-input" value="1">
-                        <label class="form-check-label" for="new_image_primary">
-                            Set as primary image
-                        </label>
-                    </div>
-                </div>
-            </div>
-
             <!-- SECTION 7: ADDITIONAL INFORMATION -->
             <div class="form-section">
                 <h3 class="section-title">Additional Information</h3>
@@ -1186,7 +1137,7 @@
             <!-- SECTION 7F: ARTWORK IMAGES -->
             <div class="form-section">
                 <h3 class="section-title">Artwork Images</h3>
-                <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">Add artwork image URLs. Exactly one image must be selected as Primary. Fallback to first image if none chosen.</p>
+                <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">Add artwork images. You can upload a file OR provide an image URL. Exactly one image must be selected as Primary.</p>
 
                 <div id="images_container" style="margin-bottom: 1rem;">
                     @php
@@ -1196,15 +1147,31 @@
                         
                         if (is_array($oldImages)) {
                             foreach ($oldImages as $i => $row) {
+                                $url = $row['url'] ?? '';
+                                $mode = $row['mode'] ?? 'url';
+                                $resolved = '';
+                                if ($url) {
+                                    if (str_starts_with($url, 'http')) {
+                                        $resolved = $url;
+                                    } elseif (str_starts_with($url, '/storage/') || str_starts_with($url, 'storage/')) {
+                                        $resolved = asset(ltrim($url, '/'));
+                                    } else {
+                                        $resolved = asset('storage/' . ltrim($url, '/'));
+                                    }
+                                }
                                 $imagesData[] = (object)[
-                                    'image_url' => $row['url'] ?? '',
+                                    'mode' => $mode,
+                                    'image_url' => $url,
+                                    'resolved_url' => $resolved,
                                     'is_primary' => ($oldPrimary !== null && $oldPrimary == $i),
                                 ];
                             }
                         } elseif ($isEdit && isset($artwork) && $artwork->images->isNotEmpty()) {
                             foreach ($artwork->images as $img) {
                                 $imagesData[] = (object)[
+                                    'mode' => 'url',
                                     'image_url' => $img->image_url,
+                                    'resolved_url' => $img->resolved_url,
                                     'is_primary' => $img->is_primary,
                                 ];
                             }
@@ -1212,36 +1179,102 @@
                     @endphp
 
                     @forelse($imagesData as $index => $img)
-                        <div class="image-row" data-index="{{ $index }}" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background-color: #fafafa; position: relative;">
+                        <div class="image-row" data-index="{{ $index }}" style="border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background-color: #fafafa; position: relative;">
                             <button type="button" class="btn btn-danger btn-sm" onclick="removeImageRow(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
-                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-top: 1rem; align-items: start;">
-                                <div>
-                                    <label class="form-label" style="font-weight: 500; font-size: 0.85rem;">Image URL <span class="required">*</span></label>
-                                    <input type="text" name="images[{{ $index }}][url]" class="form-control image-url-input" placeholder="https://example.com/image.jpg" value="{{ $img->image_url }}" onkeyup="updateImagePreview(this)" onchange="updateImagePreview(this)">
-                                    <div style="margin-top: 5px;">
-                                        <img class="img-preview" src="{{ $img->image_url }}" style="max-height: 100px; border-radius: 4px; border: 1px solid #ddd; display: {{ $img->image_url ? 'block' : 'none' }};" onerror="this.style.display='none'">
+                            
+                            <!-- Mode Toggle -->
+                            <div class="input-mode-toggle" style="margin-bottom: 1rem; padding: 0.75rem; background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; display: inline-flex; gap: 1.5rem;">
+                                <span style="font-weight: bold; color: #555;">Image Source:</span>
+                                <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #2196F3; font-weight: 600;">
+                                    <input type="radio" name="images[{{ $index }}][mode]" value="file" {{ (!isset($img->mode) || $img->mode === 'file') ? 'checked' : '' }} onchange="toggleImageInputMode(this, {{ $index }})" style="accent-color: #2196F3;"> Upload File
+                                </label>
+                                <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #555; font-weight: 600;">
+                                    <input type="radio" name="images[{{ $index }}][mode]" value="url" {{ (isset($img->mode) && $img->mode === 'url') ? 'checked' : '' }} onchange="toggleImageInputMode(this, {{ $index }})" style="accent-color: #555;"> Use URL
+                                </label>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1rem;">
+                                <!-- Upload Local File -->
+                                <div id="group-file-{{ $index }}" class="form-group dropzone-container" style="background: #fff; padding: 1.5rem; border-radius: 8px; border: 2px dashed #ccc; transition: all 0.3s; text-align: center; cursor: pointer; position: relative; {{ (isset($img->mode) && $img->mode === 'url') ? 'opacity: 0.5; pointer-events: none;' : '' }}"
+                                     ondragover="handleDragOver(event, this)"
+                                     ondragleave="handleDragLeave(event, this)"
+                                     ondrop="handleFileDrop(event, {{ $index }}, this)"
+                                     onclick="document.getElementById('file-input-{{ $index }}').click()">
+                                    <div style="pointer-events: none;">
+                                        <svg style="width: 48px; height: 48px; color: #2196F3; margin-bottom: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                        <p style="margin: 0; font-weight: bold; color: #333;">Drag & Drop image here</p>
+                                        <p style="margin: 0; color: #666; font-size: 0.9rem;">or click to browse</p>
+                                        <p id="file-name-{{ $index }}" style="margin-top: 0.5rem; color: #2196F3; font-size: 0.85rem; font-weight: bold; word-break: break-all;"></p>
+                                        <small class="form-text text-muted" style="display: block; margin-top: 0.5rem;">Accepted: JPG, PNG, WEBP. Max size: 5MB.</small>
                                     </div>
+                                    <input type="file" id="file-input-{{ $index }}" name="images[{{ $index }}][file]" class="form-control" accept=".jpg,.jpeg,.png,.webp" onchange="handleFileSelect(this, {{ $index }})" {{ (isset($img->mode) && $img->mode === 'url') ? 'disabled' : '' }} style="display: none;">
                                 </div>
-                                <div style="display: flex; align-items: center; height: 100%; padding-top: 1.8rem; gap: 0.5rem;">
-                                    <input type="radio" name="primary_image_index" value="{{ $index }}" class="form-check-input primary-radio" {{ $img->is_primary ? 'checked' : '' }} style="margin-top: 0; width: 1.25rem; height: 1.25rem; cursor: pointer;">
-                                    <label class="form-check-label" style="font-weight: 500; font-size: 0.85rem; cursor: pointer; margin-bottom: 0;">Primary Image</label>
+
+                                <!-- OR Enter URL -->
+                                <div id="group-url-{{ $index }}" class="form-group" style="background: #fff; padding: 1rem; border-radius: 8px; border: 1px dashed #ccc; transition: all 0.3s; {{ (!isset($img->mode) || $img->mode === 'file') ? 'opacity: 0.5; pointer-events: none;' : '' }}">
+                                    <label class="form-label" style="font-weight: bold; color: #555;">OR Image URL</label>
+                                    <input type="text" name="images[{{ $index }}][url]" class="form-control image-url-input" placeholder="https://example.com/image.jpg" value="{{ $img->image_url }}" onkeyup="updateRowImagePreview(this, {{ $index }})" onchange="updateRowImagePreview(this, {{ $index }})" {{ (!isset($img->mode) || $img->mode === 'file') ? 'disabled' : '' }}>
+                                    <small class="form-text text-muted" style="display: block; margin-top: 0.5rem;">Must be a direct image link.</small>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 2rem; align-items: start;">
+                                <div style="flex: 1;">
+                                    <img id="img-preview-{{ $index }}" class="img-preview" src="{{ $img->resolved_url }}" style="max-height: 150px; border-radius: 4px; border: 1px solid #ddd; display: {{ $img->resolved_url ? 'block' : 'none' }};" onerror="this.style.display='none'">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; padding-top: 0.5rem;">
+                                    <input type="radio" name="primary_image_index" value="{{ $index }}" class="form-check-input primary-radio" {{ $img->is_primary ? 'checked' : '' }} style="margin-top: 0; width: 1.25rem; height: 1.25rem; cursor: pointer; accent-color: #2196F3;">
+                                    <label class="form-check-label" style="font-weight: bold; cursor: pointer; margin-bottom: 0;">Set as Primary Image</label>
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <div class="image-row" data-index="0" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background-color: #fafafa; position: relative;">
+                        <div class="image-row" data-index="0" style="border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background-color: #fafafa; position: relative;">
                             <button type="button" class="btn btn-danger btn-sm" onclick="removeImageRow(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
-                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-top: 1rem; align-items: start;">
-                                <div>
-                                    <label class="form-label" style="font-weight: 500; font-size: 0.85rem;">Image URL <span class="required">*</span></label>
-                                    <input type="text" name="images[0][url]" class="form-control image-url-input" placeholder="https://example.com/image.jpg" value="" onkeyup="updateImagePreview(this)" onchange="updateImagePreview(this)">
-                                    <div style="margin-top: 5px;">
-                                        <img class="img-preview" src="" style="max-height: 100px; border-radius: 4px; border: 1px solid #ddd; display: none;" onerror="this.style.display='none'">
+                            
+                            <!-- Mode Toggle -->
+                            <div class="input-mode-toggle" style="margin-bottom: 1rem; padding: 0.75rem; background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; display: inline-flex; gap: 1.5rem;">
+                                <span style="font-weight: bold; color: #555;">Image Source:</span>
+                                <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #2196F3; font-weight: 600;">
+                                    <input type="radio" name="images[0][mode]" value="file" checked onchange="toggleImageInputMode(this, 0)" style="accent-color: #2196F3;"> Upload File
+                                </label>
+                                <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #555; font-weight: 600;">
+                                    <input type="radio" name="images[0][mode]" value="url" onchange="toggleImageInputMode(this, 0)" style="accent-color: #555;"> Use URL
+                                </label>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1rem;">
+                                <!-- Upload Local File -->
+                                <div id="group-file-0" class="form-group dropzone-container" style="background: #fff; padding: 1.5rem; border-radius: 8px; border: 2px dashed #ccc; transition: all 0.3s; text-align: center; cursor: pointer; position: relative;"
+                                     ondragover="handleDragOver(event, this)"
+                                     ondragleave="handleDragLeave(event, this)"
+                                     ondrop="handleFileDrop(event, 0, this)"
+                                     onclick="document.getElementById('file-input-0').click()">
+                                    <div style="pointer-events: none;">
+                                        <svg style="width: 48px; height: 48px; color: #2196F3; margin-bottom: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                        <p style="margin: 0; font-weight: bold; color: #333;">Drag & Drop image here</p>
+                                        <p style="margin: 0; color: #666; font-size: 0.9rem;">or click to browse</p>
+                                        <p id="file-name-0" style="margin-top: 0.5rem; color: #2196F3; font-size: 0.85rem; font-weight: bold; word-break: break-all;"></p>
+                                        <small class="form-text text-muted" style="display: block; margin-top: 0.5rem;">Accepted: JPG, PNG, WEBP. Max size: 5MB.</small>
                                     </div>
+                                    <input type="file" id="file-input-0" name="images[0][file]" class="form-control" accept=".jpg,.jpeg,.png,.webp" onchange="handleFileSelect(this, 0)" style="display: none;">
                                 </div>
-                                <div style="display: flex; align-items: center; height: 100%; padding-top: 1.8rem; gap: 0.5rem;">
-                                    <input type="radio" name="primary_image_index" value="0" class="form-check-input primary-radio" checked style="margin-top: 0; width: 1.25rem; height: 1.25rem; cursor: pointer;">
-                                    <label class="form-check-label" style="font-weight: 500; font-size: 0.85rem; cursor: pointer; margin-bottom: 0;">Primary Image</label>
+
+                                <!-- OR Enter URL -->
+                                <div id="group-url-0" class="form-group" style="background: #fff; padding: 1rem; border-radius: 8px; border: 1px dashed #ccc; transition: all 0.3s; opacity: 0.5; pointer-events: none;">
+                                    <label class="form-label" style="font-weight: bold; color: #555;">OR Image URL</label>
+                                    <input type="text" name="images[0][url]" class="form-control image-url-input" placeholder="https://example.com/image.jpg" value="" onkeyup="updateRowImagePreview(this, 0)" onchange="updateRowImagePreview(this, 0)" disabled>
+                                    <small class="form-text text-muted" style="display: block; margin-top: 0.5rem;">Must be a direct image link.</small>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 2rem; align-items: start;">
+                                <div style="flex: 1;">
+                                    <img id="img-preview-0" class="img-preview" src="" style="max-height: 150px; border-radius: 4px; border: 1px solid #ddd; display: none;" onerror="this.style.display='none'">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; padding-top: 0.5rem;">
+                                    <input type="radio" name="primary_image_index" value="0" class="form-check-input primary-radio" checked style="margin-top: 0; width: 1.25rem; height: 1.25rem; cursor: pointer; accent-color: #2196F3;">
+                                    <label class="form-check-label" style="font-weight: bold; cursor: pointer; margin-bottom: 0;">Set as Primary Image</label>
                                 </div>
                             </div>
                         </div>
@@ -2442,41 +2475,110 @@ function removeExhibitionRow(button) {
 
 // Dynamic Artwork Image Rows
 let imageIndex = document.querySelectorAll('.image-row').length;
+function toggleImageInputMode(radioBtn, index) {
+    const mode = radioBtn.value;
+    const groupFile = document.getElementById(`group-file-${index}`);
+    const groupUrl = document.getElementById(`group-url-${index}`);
+    const fileInput = groupFile.querySelector('input[type="file"]');
+    const urlInput = groupUrl.querySelector('input[type="text"]');
+    const imgPreview = document.getElementById(`img-preview-${index}`);
+
+    if (mode === 'file') {
+        // Enable File
+        groupFile.style.opacity = '1';
+        groupFile.style.pointerEvents = 'auto';
+        fileInput.disabled = false;
+        
+        // Disable URL
+        groupUrl.style.opacity = '0.5';
+        groupUrl.style.pointerEvents = 'none';
+        urlInput.disabled = true;
+        urlInput.value = ''; // Clear URL input
+    } else if (mode === 'url') {
+        // Enable URL
+        groupUrl.style.opacity = '1';
+        groupUrl.style.pointerEvents = 'auto';
+        urlInput.disabled = false;
+        
+        // Disable File
+        groupFile.style.opacity = '0.5';
+        groupFile.style.pointerEvents = 'none';
+        fileInput.disabled = true;
+        fileInput.value = ''; // Clear File input
+    }
+    
+    // Clear preview image when switching modes
+    imgPreview.src = '';
+    imgPreview.style.display = 'none';
+}
+
 function addImageRow() {
     const container = document.getElementById('images_container');
     const div = document.createElement('div');
     div.className = 'image-row';
     div.dataset.index = imageIndex;
-    div.style = 'border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background-color: #fafafa; position: relative;';
+    div.style = 'border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background-color: #fafafa; position: relative;';
     div.innerHTML = `
         <button type="button" class="btn btn-danger btn-sm" onclick="removeImageRow(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-top: 1rem; align-items: start;">
-            <div>
-                <label class="form-label" style="font-weight: 500; font-size: 0.85rem;">Image URL <span class="required">*</span></label>
-                <input type="text" name="images[${imageIndex}][url]" class="form-control image-url-input" placeholder="https://example.com/image.jpg" value="" onkeyup="updateImagePreview(this)" onchange="updateImagePreview(this)">
-                <div style="margin-top: 5px;">
-                    <img class="img-preview" src="" style="max-height: 100px; border-radius: 4px; border: 1px solid #ddd; display: none;" onerror="this.style.display='none'">
+        
+        <!-- Mode Toggle -->
+        <div class="input-mode-toggle" style="margin-bottom: 1rem; padding: 0.75rem; background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; display: inline-flex; gap: 1.5rem;">
+            <span style="font-weight: bold; color: #555;">Image Source:</span>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #2196F3; font-weight: 600;">
+                <input type="radio" name="images[${imageIndex}][mode]" value="file" checked onchange="toggleImageInputMode(this, ${imageIndex})" style="accent-color: #2196F3;"> Upload File
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #555; font-weight: 600;">
+                <input type="radio" name="images[${imageIndex}][mode]" value="url" onchange="toggleImageInputMode(this, ${imageIndex})" style="accent-color: #555;"> Use URL
+            </label>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1rem;">
+            <!-- Upload Local File -->
+            <div id="group-file-${imageIndex}" class="form-group dropzone-container" style="background: #fff; padding: 1.5rem; border-radius: 8px; border: 2px dashed #ccc; transition: all 0.3s; text-align: center; cursor: pointer; position: relative;"
+                 ondragover="handleDragOver(event, this)"
+                 ondragleave="handleDragLeave(event, this)"
+                 ondrop="handleFileDrop(event, ${imageIndex}, this)"
+                 onclick="document.getElementById('file-input-' + ${imageIndex}).click()">
+                <div style="pointer-events: none;">
+                    <svg style="width: 48px; height: 48px; color: #2196F3; margin-bottom: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <p style="margin: 0; font-weight: bold; color: #333;">Drag & Drop image here</p>
+                    <p style="margin: 0; color: #666; font-size: 0.9rem;">or click to browse</p>
+                    <p id="file-name-${imageIndex}" style="margin-top: 0.5rem; color: #2196F3; font-size: 0.85rem; font-weight: bold; word-break: break-all;"></p>
+                    <small class="form-text text-muted" style="display: block; margin-top: 0.5rem;">Accepted: JPG, PNG, WEBP. Max size: 5MB.</small>
                 </div>
+                <input type="file" id="file-input-${imageIndex}" name="images[${imageIndex}][file]" class="form-control" accept=".jpg,.jpeg,.png,.webp" onchange="handleFileSelect(this, ${imageIndex})" style="display: none;">
             </div>
-            <div style="display: flex; align-items: center; height: 100%; padding-top: 1.8rem; gap: 0.5rem;">
-                <input type="radio" name="primary_image_index" value="${imageIndex}" class="form-check-input primary-radio" style="margin-top: 0; width: 1.25rem; height: 1.25rem; cursor: pointer;">
-                <label class="form-check-label" style="font-weight: 500; font-size: 0.85rem; cursor: pointer; margin-bottom: 0;">Primary Image</label>
+
+            <!-- OR Enter URL -->
+            <div id="group-url-${imageIndex}" class="form-group" style="background: #fff; padding: 1rem; border-radius: 8px; border: 1px dashed #ccc; transition: all 0.3s; opacity: 0.5; pointer-events: none;">
+                <label class="form-label" style="font-weight: bold; color: #555;">OR Image URL</label>
+                <input type="text" name="images[${imageIndex}][url]" class="form-control image-url-input" placeholder="https://example.com/image.jpg" value="" onkeyup="updateRowImagePreview(this, ${imageIndex})" onchange="updateRowImagePreview(this, ${imageIndex})" disabled>
+                <small class="form-text text-muted" style="display: block; margin-top: 0.5rem;">Must be a direct image link.</small>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 2rem; align-items: start;">
+            <div style="flex: 1;">
+                <img id="img-preview-${imageIndex}" class="img-preview" src="" style="max-height: 150px; border-radius: 4px; border: 1px solid #ddd; display: none;" onerror="this.style.display='none'">
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding-top: 0.5rem;">
+                <input type="radio" name="primary_image_index" value="${imageIndex}" class="form-check-input primary-radio" style="margin-top: 0; width: 1.25rem; height: 1.25rem; cursor: pointer; accent-color: #2196F3;">
+                <label class="form-check-label" style="font-weight: bold; cursor: pointer; margin-bottom: 0;">Set as Primary Image</label>
             </div>
         </div>
     `;
     container.appendChild(div);
     imageIndex++;
 }
+
 function removeImageRow(button) {
     const row = button.closest('.image-row');
     const container = document.getElementById('images_container');
     
-    // Check if the removed row was checked
     const wasChecked = row.querySelector('.primary-radio').checked;
     
     if (container.querySelectorAll('.image-row').length > 1) {
         row.remove();
-        // If the deleted row was checked, select the first remaining row's radio button as primary
         if (wasChecked) {
             const remainingRadios = container.querySelectorAll('.primary-radio');
             if (remainingRadios.length > 0) {
@@ -2486,21 +2588,81 @@ function removeImageRow(button) {
     } else {
         row.querySelectorAll('input').forEach(el => {
             if (el.type === 'text') el.value = '';
+            if (el.type === 'file') el.value = '';
         });
         row.querySelector('.img-preview').style.display = 'none';
         row.querySelector('.img-preview').src = '';
     }
 }
-function updateImagePreview(input) {
-    const parent = input.closest('.image-row');
-    const img = parent.querySelector('.img-preview');
+
+function previewRowImage(input, index) {
+    const preview = document.getElementById('img-preview-' + index);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        const urlInput = document.querySelector('input[name="images[' + index + '][url]"]');
+        if (urlInput && urlInput.value) {
+            preview.src = urlInput.value;
+            preview.style.display = 'block';
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    }
+}
+
+function handleDragOver(e, container) {
+    e.preventDefault();
+    container.style.backgroundColor = '#e3f2fd';
+    container.style.borderColor = '#2196F3';
+}
+
+function handleDragLeave(e, container) {
+    e.preventDefault();
+    container.style.backgroundColor = '#fff';
+    container.style.borderColor = '#ccc';
+}
+
+function handleFileDrop(e, index, container) {
+    e.preventDefault();
+    container.style.backgroundColor = '#fff';
+    container.style.borderColor = '#ccc';
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const fileInput = document.getElementById('file-input-' + index);
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect(fileInput, index);
+    }
+}
+
+function handleFileSelect(input, index) {
+    const fileNameElement = document.getElementById('file-name-' + index);
+    if (input.files && input.files.length > 0) {
+        fileNameElement.textContent = input.files[0].name;
+    } else {
+        fileNameElement.textContent = '';
+    }
+    previewRowImage(input, index);
+}
+
+function updateRowImagePreview(input, index) {
+    const fileInput = document.querySelector('input[name="images[' + index + '][file]"]');
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+        return; // Prioritize local file preview
+    }
+    const preview = document.getElementById('img-preview-' + index);
     const url = input.value.trim();
     if (url) {
-        img.src = url;
-        img.style.display = 'block';
+        preview.src = url;
+        preview.style.display = 'block';
     } else {
-        img.src = '';
-        img.style.display = 'none';
+        preview.src = '';
+        preview.style.display = 'none';
     }
 }
 

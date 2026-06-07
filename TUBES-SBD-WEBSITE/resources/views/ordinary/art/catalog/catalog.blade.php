@@ -138,7 +138,7 @@
                                     $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
                                 @endphp
                                 @if($primaryImage)
-                                    <img src="{{ asset('storage/' . $primaryImage->image_url) }}" alt="{{ $artwork->title }}" class="artwork-image">
+                                    <img src="{{ $primaryImage->resolved_url }}" alt="{{ $artwork->title }}" class="artwork-image">
                                 @else
                                     <div class="artwork-image" style="background-color: #e8e8e8;"></div>
                                 @endif

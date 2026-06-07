@@ -72,7 +72,7 @@
                         
                         @if($primaryImage)
                             <div class="main-image">
-                                <img src="{{ $primaryImage->image_url }}" alt="{{ $artwork->title }}" class="artwork-image">
+                                <img src="{{ $primaryImage->resolved_url }}" alt="{{ $artwork->title }}" class="artwork-image">
                                 <p class="image-label">
                                     @if($primaryImage->is_primary) 
                                         <span class="badge badge-primary">Primary Image</span>
@@ -86,7 +86,7 @@
                                 <p class="thumbnails-label">Additional Images ({{ $artwork->images->count() - 1 }}):</p>
                                 @foreach($artwork->images->where('image_id', '!=', $primaryImage?->image_id) as $image)
                                     <div class="thumbnail">
-                                        <img src="{{ $image->image_url }}" alt="Thumbnail" class="thumb-img">
+                                        <img src="{{ $image->resolved_url }}" alt="Thumbnail" class="thumb-img">
                                     </div>
                                 @endforeach
                             </div>

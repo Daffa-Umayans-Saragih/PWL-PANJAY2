@@ -180,6 +180,17 @@ class ArtWork extends Model
         return $primary ? $primary->image_url : $images->first()->image_url;
     }
 
+    public function getResolvedImageUrlAttribute()
+    {
+        $images = $this->images; // Use loaded collection
+        if ($images->isEmpty()) {
+            return null;
+        }
+
+        $primary = $images->where('is_primary', true)->first();
+        return $primary ? $primary->resolved_url : $images->first()->resolved_url;
+    }
+
     public function artWorkSims(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ArtWorkSim::class, 'art_work_id');
