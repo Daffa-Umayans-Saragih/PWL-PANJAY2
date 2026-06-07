@@ -238,7 +238,7 @@ class MembershipService
         $this->syncPremiumState($user, $hasActiveMembership);
     }
 
-    public function syncPremiumState(User $user, bool $isPremium,  ? \Illuminate\Support\Carbon $expiresAt = null,  ? \Illuminate\Support\Carbon $startedAt = null) : void
+    public function syncPremiumState(User $user, bool $isPremium,  ? \Carbon\CarbonInterface $expiresAt = null,  ? \Carbon\CarbonInterface $startedAt = null) : void
     {
         $payload = [
             'premium_started_at' => $isPremium ? ($startedAt ?? now()) : $user->premium_started_at,

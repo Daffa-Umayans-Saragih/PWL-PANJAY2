@@ -168,7 +168,7 @@ class MembershipController extends Controller
         // CASE 3 — Gift where recipient has no account yet:
         //   Dates are null at purchase time; they are computed and stamped
         //   when the recipient registers and calls activate().
-        $isImmediatelyActive = ! $isGift;
+        $isImmediatelyActive = false; // All memberships must be activated via email
         [$newActivatedAt, $newExpiresAt] = $isImmediatelyActive
             ? $this->resolveNewMembershipDates($membershipOwner, $recipientEmail)
             : [null, null];
