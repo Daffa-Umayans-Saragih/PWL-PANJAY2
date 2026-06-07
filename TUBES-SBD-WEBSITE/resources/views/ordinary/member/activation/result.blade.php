@@ -10,12 +10,12 @@
         align-items: center;
         justify-content: center;
         padding: 60px 24px;
-        background: #f5f2ee;
+        background: #F5F7FA;
     }
 
     .activation-card {
         background: #fff;
-        border: 1px solid #e7dfd7;
+        border: 1px solid #D9E2EC;
         border-radius: 24px;
         max-width: 560px;
         width: 100%;
@@ -29,12 +29,12 @@
     }
 
     .activation-card__header--success {
-        background: linear-gradient(160deg, #e4002b 0%, #a0001f 100%);
+        background: linear-gradient(160deg, #082B5B 0%, #103B78 100%);
         color: #fff;
     }
 
     .activation-card__header--error {
-        background: linear-gradient(160deg, #4a3728 0%, #2d2219 100%);
+        background: linear-gradient(160deg, #103B78 0%, #082B5B 100%);
         color: #fff;
     }
 
@@ -92,14 +92,14 @@
 
     .activation-message {
         font-size: 15px;
-        color: #4a3728;
+        color: #1E293B;
         line-height: 1.75;
         margin: 0 0 28px;
     }
 
     .activation-detail {
-        background: #fbf8f5;
-        border: 1px solid #e7dfd7;
+        background: #F5F7FA;
+        border: 1px solid #D9E2EC;
         border-radius: 14px;
         padding: 20px 24px;
         margin-bottom: 28px;
@@ -112,7 +112,7 @@
         align-items: center;
         padding: 6px 0;
         font-size: 14px;
-        border-bottom: 1px solid #ede8e2;
+        border-bottom: 1px solid #D9E2EC;
     }
 
     .activation-detail__row:last-child {
@@ -120,13 +120,13 @@
     }
 
     .activation-detail__label {
-        color: #7a6f68;
+        color: #1E293B;
         font-weight: 600;
         letter-spacing: 0.03em;
     }
 
     .activation-detail__value {
-        color: #1f1f1f;
+        color: #1E293B;
         font-weight: 700;
     }
 
@@ -153,7 +153,7 @@
 
     .activation-btn {
         display: inline-block;
-        background: #e4002b;
+        background: #082B5B;
         color: #fff;
         text-decoration: none;
         font-size: 15px;
@@ -161,25 +161,25 @@
         padding: 14px 32px;
         border-radius: 999px;
         transition: background 0.2s, box-shadow 0.2s;
-        box-shadow: 0 8px 20px rgba(228,0,43,0.22);
+        box-shadow: 0 8px 20px rgba(8,43,91,0.22);
     }
 
     .activation-btn:hover {
-        background: #b50023;
-        box-shadow: 0 12px 28px rgba(228,0,43,0.32);
+        background: #103B78;
+        box-shadow: 0 12px 28px rgba(8,43,91,0.32);
         color: #fff;
     }
 
     .activation-btn--secondary {
-        background: #f5f2ee;
-        color: #4a3728;
+        background: #F5F7FA;
+        color: #1E293B;
         box-shadow: none;
-        border: 1px solid #ddd5cb;
+        border: 1px solid #D9E2EC;
     }
 
     .activation-btn--secondary:hover {
-        background: #ede8e2;
-        color: #4a3728;
+        background: #D9E2EC;
+        color: #1E293B;
         box-shadow: none;
     }
 
@@ -194,7 +194,7 @@
         font-size: 11px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: #a89b91;
+        color: #1E293B;
         margin-top: 28px;
     }
 </style>

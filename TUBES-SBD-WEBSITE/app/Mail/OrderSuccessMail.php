@@ -28,7 +28,7 @@ class OrderSuccessMail extends Mailable
         ]);
 
         $subject = (strtolower($this->order?->order_type) === 'membership') 
-            ? 'Your MET Membership Invoice' 
+            ? 'Your OC Membership Invoice' 
             : 'Your Ticket Order';
 
         return $this->subject($subject)

@@ -12,7 +12,7 @@ class GiftMembershipMail extends Mailable
 
     public function build()
     {
-        return $this->subject("You've Received a MET Membership Gift")
+        return $this->subject("You've Received an OC Membership Gift")
             ->view('emails.gift-membership')
             ->with([
                 'membership' => $this->membership,

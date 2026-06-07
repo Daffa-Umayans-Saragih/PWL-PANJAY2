@@ -345,7 +345,7 @@ class MembershipController extends Controller
             return view('ordinary.member.activation.result', [
                 'success'    => true,
                 'title'      => 'Membership Already Active',
-                'message'    => 'Your membership is already active. Enjoy unlimited access to The Metropolitan Museum of Art!',
+                'message'    => 'Your membership is already active. Enjoy unlimited access to OC Museum!',
                 'membership' => $membership,
             ]);
         }

@@ -17,7 +17,7 @@ class MembershipActivationMail extends Mailable
             'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10)
         ]);
 
-        return $this->subject('Your MET Membership Confirmation')
+        return $this->subject('Your OC Membership Confirmation')
             ->view('emails.membership-activation')
             ->with([
                 'membership'    => $this->membership,
