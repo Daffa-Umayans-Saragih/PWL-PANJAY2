@@ -27,6 +27,8 @@ use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\TicketAnalyticsController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\ArtController;
 use App\Http\Controllers\ArtWorkController;
 use App\Http\Controllers\AuthController;
@@ -41,6 +43,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\OurExperienceController;
 use App\Http\Controllers\VisitController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -296,6 +299,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Users (View Only for Admin)
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+
+        // Emotion Categories & Visitor Stories Moderation
+        Route::resource('categories', AdminCategoryController::class)->except(['edit', 'update']);
+        Route::resource('posts', AdminPostController::class)->only(['index', 'destroy']);
     });
 
     // Superadmin Only Routes
@@ -315,9 +322,8 @@ Route::get('/force-logout', function () {
 Route::get('/visit-guides/accessibility', function () {
     return view('ordinary.plan-your-visit.accessibility.accessibility');
 })->name('visit.accessibility');
-Route::get('/visit-guides/our-experience', function () {
-    return view('ordinary.plan-your-visit.our-experience.our-experience');
-})->name('visit.our-experience');
+Route::get('/visit-guides/our-experience', [OurExperienceController::class, 'index'])->name('visit.our-experience');
+Route::post('/visit-guides/our-experience', [OurExperienceController::class, 'store'])->name('visit.our-experience.store')->middleware('auth');
 Route::get('/member/membership', function () {
     return view('ordinary.member.membership.membership');
 })->name('member.membership');

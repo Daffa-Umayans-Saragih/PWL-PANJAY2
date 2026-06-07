@@ -58,6 +58,7 @@ class DatabaseSeeder extends Seeder
         // });
         $this->call([
             AdminAccountSeeder::class,
+            CategorySeeder::class,
             TicketSystemSeeder::class,
             DepartmentSeeder::class,
             GeographySeeder::class,

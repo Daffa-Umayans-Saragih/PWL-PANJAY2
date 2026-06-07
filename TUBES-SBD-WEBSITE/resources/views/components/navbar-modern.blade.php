@@ -43,7 +43,7 @@
             </a>
 
             <!-- Desktop Menu -->
-            <div class="hidden xl:flex items-center gap-30 text-sm font-semibold tracking-[0.02em]">
+            <div class="hidden xl:flex items-center gap-10 text-sm font-semibold tracking-[0.02em] ml-16 mr-auto">
                 <button type="button" data-menu="visit"
                     class="menu-trigger relative pb-2 text-white/90 hover:text-white transition">
                     Visit
@@ -82,6 +82,29 @@
                                 class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
                                 Account
                             </a>
+                            
+                            @if(auth()->user()->is_admin)
+                                @if(auth()->user()->role_admin === 'cashier')
+                                    <a href="{{ route('admin.dashboard') }}"
+                                        class="inline-flex items-center gap-1.5 rounded-full border border-slate-300/40 px-4 py-2 text-slate-200 font-medium whitespace-nowrap hover:text-white hover:border-white/60 hover:bg-white/5 transition-all duration-300">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        Cashier Panel
+                                    </a>
+                                @elseif(auth()->user()->role_admin === 'superadmin')
+                                    <a href="{{ route('admin.dashboard') }}"
+                                        class="inline-flex items-center gap-1.5 rounded-full border border-[#d4af37]/40 px-4 py-2 text-[#d4af37] font-medium whitespace-nowrap hover:text-[#f3d79b] hover:border-[#f3d79b]/60 hover:bg-[#d4af37]/5 transition-all duration-300">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2l3 5 5-2-2 6-2 9H6L4 11l-2-6 5 2 3-5z"></path></svg>
+                                        Super Admin Panel
+                                    </a>
+                                @else
+                                    <a href="{{ route('admin.dashboard') }}"
+                                        class="inline-flex items-center gap-1.5 rounded-full border border-[#c8a96b]/40 px-4 py-2 text-[#c8a96b] font-medium whitespace-nowrap hover:text-[#e5c78b] hover:border-[#e5c78b]/60 hover:bg-[#c8a96b]/5 transition-all duration-300">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                        Admin Panel
+                                    </a>
+                                @endif
+                            @endif
+
                             <a href="{{ route('order.show') }}"
                                 class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
                                 Orders

@@ -61,6 +61,21 @@
                 </a>
             </li>
 
+            <!-- Community Section -->
+            <li class="admin-nav-section">
+                <div class="admin-nav-section-title">Community</div>
+            </li>
+            <li class="admin-nav-item">
+                <a href="{{ route('admin.categories.index') }}" class="admin-nav-link @if(request()->routeIs('admin.categories.*')) active @endif">
+                    🏷️ Emotion Categories
+                </a>
+            </li>
+            <li class="admin-nav-item">
+                <a href="{{ route('admin.posts.index') }}" class="admin-nav-link @if(request()->routeIs('admin.posts.*')) active @endif">
+                    💬 Visitor Stories
+                </a>
+            </li>
+
             <!-- Management Section -->
             <li class="admin-nav-section">
                 <div class="admin-nav-section-title">Management</div>

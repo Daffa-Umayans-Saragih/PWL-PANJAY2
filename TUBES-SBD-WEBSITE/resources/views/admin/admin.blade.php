@@ -23,7 +23,7 @@
                 <div class="admin-topbar-user">
                     <div>
                         <div class="admin-topbar-user-name">{{ Auth::user()->name }}</div>
-                        <div class="admin-topbar-user-role">{{ Auth::user()->role }}</div>
+                        <div class="admin-topbar-user-role">{{ Auth::user()->role_admin ? ucfirst(Auth::user()->role_admin) : 'User' }}</div>
                     </div>
                     <form action="{{ route('account.logout') }}" method="POST" class="form-no-margin">
                         @csrf

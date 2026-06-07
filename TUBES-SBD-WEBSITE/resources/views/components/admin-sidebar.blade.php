@@ -30,10 +30,29 @@
             <div class="admin-nav-section-title">Collection</div>
         </li>
         <li class="admin-nav-item">
-            <a href="{{ route('admin.art.index') }}"
-               class="admin-nav-link @if(request()->routeIs('admin.art.*')) active @endif">
+            <a href="{{ route('admin.artworks.index') }}"
+               class="admin-nav-link @if(request()->routeIs('admin.artworks.*')) active @endif">
                 <span class="admin-nav-icon">🎨</span>
                 <span>Artworks</span>
+            </a>
+        </li>
+
+        <!-- Community Section -->
+        <li class="admin-nav-section">
+            <div class="admin-nav-section-title">Community</div>
+        </li>
+        <li class="admin-nav-item">
+            <a href="{{ route('admin.categories.index') }}"
+               class="admin-nav-link @if(request()->routeIs('admin.categories.*')) active @endif">
+                <span class="admin-nav-icon">🏷️</span>
+                <span>Emotion Categories</span>
+            </a>
+        </li>
+        <li class="admin-nav-item">
+            <a href="{{ route('admin.posts.index') }}"
+               class="admin-nav-link @if(request()->routeIs('admin.posts.*')) active @endif">
+                <span class="admin-nav-icon">💬</span>
+                <span>Visitor Stories</span>
             </a>
         </li>
 
