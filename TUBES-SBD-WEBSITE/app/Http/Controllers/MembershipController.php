@@ -280,8 +280,15 @@ class MembershipController extends Controller
         }
 
         // 6. Send Payment Confirmation (OrderSuccessMail) to Donor/Purchaser
-        $invoiceEmail = $donorEmail ?: $recipientEmail;
-        if ($invoiceEmail) {
+        $invoiceRecipients = [$donorEmail ?: $recipientEmail];
+
+        if ($isGift && $shipTo === 'recipient' && $emailConf === 'both') {
+            $invoiceRecipients[] = $recipientEmail;
+        }
+
+        $invoiceRecipients = array_unique(array_filter($invoiceRecipients));
+
+        foreach ($invoiceRecipients as $email) {
             try {
                 // SAFE SCOPE RECOVERY
                 $order = \App\Models\Order::find($membership->order_id);
@@ -291,12 +298,12 @@ class MembershipController extends Controller
                         'first_name' => $validated['first_name'] ?? 'Valued',
                         'last_name'  => $validated['last_name'] ?? 'Member'
                     ];
-                    Mail::to($invoiceEmail)->send(new \App\Mail\OrderSuccessMail($order, $dummyBilling));
+                    Mail::to($email)->send(new \App\Mail\OrderSuccessMail($order, $dummyBilling));
                 }
             } catch (Throwable $e) {
                 Log::error('OrderSuccessMail failed for membership', [
                     'order_id' => $membership->order_id,
-                    'to'       => $invoiceEmail,
+                    'to'       => $email,
                     'error'    => $e->getMessage(),
                 ]);
             }
