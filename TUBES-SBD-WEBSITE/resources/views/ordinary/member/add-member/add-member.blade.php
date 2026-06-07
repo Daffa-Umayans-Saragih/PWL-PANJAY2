@@ -80,11 +80,10 @@
                         </div>
                         <div class="mem-renewal-body">
                             <h2 class="mem-card__title" id="renewalTitle">
-                                Save <span class="mem-highlight">10%</span> when you sign up for Automatic Renewal!
+                                 <span class="mem-highlight"></span> Automatic Renewal!
                             </h2>
                             <div class="mem-renewal-desc">
-                                <p>The 10% Membership discount is applicable online only with coupon code <strong>AUTO10</strong> and limited to Global, Individual, Dual, Family, Enthusiast, and Ambassador level Memberships.</p>
-                                <p>This 10% discount is a <em>one-time</em> sign up discount. Subsequent autorenewals will charge the then current full Membership level dues of the respective Membership level. Only applicable to Members who are not currently enrolled in the Membership autorenewal program.</p>
+
                             </div>
                             <div class="mem-radio-group mem-radio-group--stacked" role="radiogroup" aria-label="Automatic renewal options">
                                 <label class="mem-radio-label">

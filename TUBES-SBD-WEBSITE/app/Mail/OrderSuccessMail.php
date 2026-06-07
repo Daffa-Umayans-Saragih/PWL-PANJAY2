@@ -22,6 +22,11 @@ class OrderSuccessMail extends Mailable
 
     public function build()
     {
+        \Illuminate\Support\Facades\Log::info('OrderSuccessMail Dispatched', [
+            'to' => request()->url(),
+            'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10)
+        ]);
+
         $subject = (strtolower($this->order?->order_type) === 'membership') 
             ? 'Your MET Membership Invoice' 
             : 'Your Ticket Order';
