@@ -186,7 +186,11 @@ class PaymentController extends Controller
         $total = $query->count();
         
         $revenueQuery = clone $query;
-        $revenue = $revenueQuery->whereRaw('LOWER(payment_status) = ?', ['paid'])->sum('amount');
+        $revenue = $revenueQuery->whereRaw('LOWER(payment_status) = ?', ['paid'])
+            ->whereHas('order', function($q) {
+                $q->whereRaw('LOWER(order_status) IN (?, ?)', ['paid', 'completed']);
+            })
+            ->sum('amount');
         
         $average = $total > 0 ? $revenue / $total : 0;
         
