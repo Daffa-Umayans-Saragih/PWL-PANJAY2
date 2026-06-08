@@ -2,9 +2,9 @@
   <header class="w-full h-[92px] bg-[#07244a] flex items-center justify-between px-10">
     
     <!-- LOGO -->
-    <div class="text-white font-bold leading-[0.78] text-[45px]">
+    <a href="{{ route('home') }}" class="text-white font-bold leading-[0.78] text-[45px] no-underline">
       <div>OC</div>
-    </div>
+    </a>
 
     <!-- RIGHT -->
     <div class="flex items-center gap-10 text-white">

@@ -160,8 +160,20 @@ class AuthController extends Controller
                 ->with('info', 'No account found with this email. Please create one.');
         }
 
-        // TODO: Send password reset email
-        // For now, just show a message
+        // Generate a random token
+        $token = \Illuminate\Support\Str::random(64);
+
+        // Insert or update the token in the database (stored as a hash for security)
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'token' => \Illuminate\Support\Facades\Hash::make($token),
+                'created_at' => \Carbon\Carbon::now()
+            ]
+        );
+
+        // Send password reset email using the existing mailable
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\ResetPasswordMail($token, $user->email));
 
         return back()->with('status', 'If that email address is in our system, we have sent password reset instructions.');
     }
