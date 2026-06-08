@@ -1,3 +1,4 @@
+@reference "tailwindcss";
 @layer components {
 
     /* Section pembungkus utama agar konten tetap di tengah */

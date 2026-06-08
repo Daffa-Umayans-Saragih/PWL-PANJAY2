@@ -1,3 +1,4 @@
+@reference "tailwindcss";
 @layer base {
     /* Ini rahasia supaya pas klik link, jalannya mulus/smooth */
     html {

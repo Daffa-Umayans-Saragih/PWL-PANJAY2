@@ -10,11 +10,11 @@
     <div class="flex items-center gap-10 text-white">
 
       <!-- LOGIN / LOGOUT -->
-      @auth
+      @if(Auth::check() || session()->has('guest_id'))
       <form action="{{ route('account.logout') }}" method="POST" class="inline m-0 p-0">
         @csrf
         <button type="submit" class="flex items-center gap-3 text-[18px] font-semibold bg-transparent border-none text-white cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2#07244a">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0ZM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.5-1.632Z"/>
           </svg>
           <span>Logout</span>
@@ -27,7 +27,7 @@
         </svg>
         <span>Login</span>
       </a>
-      @endauth
+      @endif
 
       <!-- CART -->
       <a href="{{ route('ticket.cart') }}" class="flex items-center gap-3 text-[18px] font-semibold">
