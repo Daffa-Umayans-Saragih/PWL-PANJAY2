@@ -20,7 +20,9 @@
                     Shop <i class="fa-solid fa-arrow-up-right-from-square text-[10px] mt-1"></i>
                 </li>
                 <li class="cursor-pointer hover:opacity-70 transition-opacity pl-2">
-                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    <a href="{{ route('art.search') }}" class="text-white no-underline">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </a>
                 </li>
             </ul>
         </div>

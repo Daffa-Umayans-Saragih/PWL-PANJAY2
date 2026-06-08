@@ -13,9 +13,9 @@
   <header class="w-full h-[92px] bg-[#07244a] flex items-center justify-between px-10">
     
     <!-- LOGO -->
-    <div class="text-white font-bold leading-[0.78] text-[45px]">
-      <div>OC</div>
-    </div>
+    <a href="{{ route('home') }}" class="no-underline">
+      <div class="text-white font-bold leading-[0.78] text-[45px]">OC</div>
+    </a>
 
     <!-- RIGHT -->
     <div class="flex items-center gap-10 text-white">

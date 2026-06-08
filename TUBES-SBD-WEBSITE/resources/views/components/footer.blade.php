@@ -27,7 +27,7 @@
             <h3>Collections</h3>
             <ul>
                 <li><a href="#">Explore</a></li>
-                <li><a href="#">Search</a></li>
+                <li><a href="{{ route('art.search') }}">Search</a></li>
                 <li><a href="#">Departments</a></li>
             </ul>
         </div>

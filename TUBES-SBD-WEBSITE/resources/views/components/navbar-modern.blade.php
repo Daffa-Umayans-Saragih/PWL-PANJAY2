@@ -58,9 +58,9 @@
             <div class="flex items-center gap-3 text-sm font-medium">
 
                 <!-- Search Button -->
-                <button class="text-white/90 hover:text-white transition" aria-label="Search">
+                <a href="{{ route('art.search') }}" class="text-white/90 hover:text-white transition" aria-label="Search">
                     <i class="fas fa-search text-lg"></i>
-                </button>
+                </a>
 
                 <!-- Desktop Right Menu -->
                 <div class="hidden xl:flex items-center gap-3">
